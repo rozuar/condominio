@@ -10,12 +10,24 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#2D5016',
-          light: '#4A7C23',
-          dark: '#1F3810',
+          DEFAULT: '#00C853',
+          light: '#69F0AE',
+          dark: '#00A844',
         },
-        tierra: '#8B7355',
-        agua: '#3B82A0',
+        tierra: {
+          DEFAULT: '#FF9800',
+          light: '#FFB74D',
+          dark: '#F57C00',
+        },
+        agua: {
+          DEFAULT: '#00B0FF',
+          light: '#40C4FF',
+          dark: '#0091EA',
+        },
+        cielo: '#00E5FF',
+        accent: '#FF4081',
+        success: '#00E676',
+        warning: '#FFEA00',
       },
     },
   },
