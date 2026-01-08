@@ -1,0 +1,9 @@
+Visión general de arquitectura
+Arquitectura modular, orientada a eventos, con separación clara entre:
+Backend de negocio go
+Frontend web next.js typescript
+Frontend backoffice next.js typescript
+mobile nativo android kotlin
+Canales de notificación
+Capa de datos
+Infraestructura portable (Railway → GCP)
