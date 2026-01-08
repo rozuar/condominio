@@ -49,6 +49,23 @@ func (m *AuthMiddleware) RequireRole(roles ...string) func(http.Handler) http.Ha
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			userRole := r.Context().Value("user_role").(string)
 
+			// Admin has access to everything
+			if userRole == "admin" {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			// Directiva has access to directiva and vecino routes
+			if userRole == "directiva" {
+				for _, role := range roles {
+					if role == "directiva" || role == "vecino" {
+						next.ServeHTTP(w, r)
+						return
+					}
+				}
+			}
+
+			// Check exact role match
 			for _, role := range roles {
 				if userRole == role {
 					next.ServeHTTP(w, r)
