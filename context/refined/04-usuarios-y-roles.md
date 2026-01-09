@@ -8,9 +8,9 @@
 - Rápido y seguro
 
 ### 2. Email y Contraseña
-- Registro tradicional
-- Verificación por correo
-- Recuperación de contraseña
+- **Sin auto-registro**: solo usuarios previamente creados por la directiva
+- Login tradicional con email/contraseña
+- Recuperación de contraseña (pendiente)
 
 ## Roles del Sistema
 
@@ -68,51 +68,15 @@
 - Ver mensajes de contacto
 - Administrar usuarios
 
-## Flujo de Registro
+## Alta de usuarios (sin auto-registro)
 
-```
-┌─────────────────┐
-│  Nuevo Usuario  │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  Selecciona     │
-│  método auth    │
-└────────┬────────┘
-         │
-    ┌────┴────┐
-    ▼         ▼
-┌───────┐ ┌──────────┐
-│Google │ │Email/Pass│
-└───┬───┘ └────┬─────┘
-    │          │
-    └────┬─────┘
-         │
-         ▼
-┌─────────────────┐
-│  Verificación   │
-│  de identidad   │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  Asignación     │
-│  de parcela     │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  Aprobación     │
-│  por directiva  │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  Usuario activo │
-│  Rol: Vecino    │
-└─────────────────┘
-```
+Las cuentas **no se crean desde la web pública**. La directiva debe:
+
+1. Crear la cuenta del vecino (asignando rol y, si aplica, parcela).
+2. Entregar credenciales (o habilitar login por Google vinculando el email).
+3. El vecino inicia sesión desde `/auth/login`.
+
+**Nota:** El login por Google **no crea usuarios automáticamente**. Solo permite entrar a cuentas ya existentes (y puede vincular Google por email).
 
 ## Seguridad
 

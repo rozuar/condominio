@@ -1,14 +1,14 @@
 # Estado del Desarrollo
 
-> Última actualización: 7 Enero 2025
+> Última actualización: 9 Enero 2026
 
 ## Resumen General
 
 | Componente | Estado | Progreso |
 |------------|--------|----------|
-| Backend (Go) | **Completo** | **100%** |
+| API (Go) | **Completo** | **100%** |
 | Frontend Web (Next.js) | En desarrollo | 90% |
-| Backoffice | No iniciado | 0% |
+| Backoffice | En desarrollo | 50% |
 | Mobile (Android/Kotlin) | No iniciado | 0% |
 | **Base de Datos** | **Schema listo** | **100%** |
 
@@ -19,7 +19,7 @@
 ### Migraciones
 
 ```
-backend/internal/database/migrations/
+source/api/internal/database/migrations/
 ├── 001_initial_schema.up.sql       # Schema base
 ├── 001_initial_schema.down.sql
 ├── 002_modulos_adicionales.up.sql  # Módulos futuros
@@ -80,7 +80,7 @@ backend/internal/database/migrations/
 
 ---
 
-## Backend (Go)
+## API (Go)
 
 ### Stack Implementado
 - **Framework**: chi/v5
@@ -90,7 +90,7 @@ backend/internal/database/migrations/
 
 ### Estructura
 ```
-backend/
+source/api/
 ├── cmd/api/main.go
 ├── internal/
 │   ├── config/
@@ -130,7 +130,6 @@ backend/
 ```
 GET  /health                    # Health check
 
-POST /auth/register             # Registro
 POST /auth/login                # Login
 POST /auth/refresh              # Refresh token
 GET  /auth/me                   # Usuario actual (auth)
@@ -252,7 +251,7 @@ POST /api/v1/notificaciones/broadcast  # Broadcast por roles (directiva)
 - [x] ~~Sistema de envío de emails~~
 - [x] ~~Login con Google OAuth~~
 
-**Backend 100% Completo**
+**API 100% Completa**
 
 ---
 
@@ -355,9 +354,9 @@ web/src/
 
 ## Backoffice
 
-**Estado**: No iniciado
+**Estado**: En desarrollo
 
-Carpeta `backoffice/` vacía. Pendiente crear proyecto Next.js para panel de administración.
+Proyecto Next.js creado en `source/backoffice/` para panel de administración (directiva).
 
 ---
 
@@ -372,9 +371,9 @@ Carpeta `mobile/` vacía. Pendiente crear proyecto Android nativo con Kotlin.
 ## Infraestructura
 
 ### Archivos de Configuración
-- `backend/Dockerfile` ✅
-- `backend/docker-compose.yml` ✅
-- `backend/Makefile` ✅
+- `source/api/Dockerfile` ✅
+- `source/api/docker-compose.yml` ✅
+- `source/api/Makefile` ✅
 
 ### Pendiente
 - [ ] CI/CD pipeline
@@ -392,7 +391,7 @@ Carpeta `mobile/` vacía. Pendiente crear proyecto Android nativo con Kotlin.
 | Fase 2 | Área Privada | 🟢 80% | Tesorería, Actas, Documentos, Gastos listos |
 | Fase 3 | Interacción | 🟢 100% | **Votaciones y Contacto completos** |
 | Fase 4 | Complementarios | 🟢 100% | **Emergencias, Galeria y Mapa completos** |
-| Fase 5 | Backoffice | ❌ 0% | No iniciado |
+| Fase 5 | Backoffice | 🟡 50% | En desarrollo |
 | Fase 6 | Mobile | ❌ 0% | No iniciado |
 
 ---
@@ -474,7 +473,7 @@ Carpeta `mobile/` vacía. Pendiente crear proyecto Android nativo con Kotlin.
   - Flujo completo: /auth/google -> Google -> /auth/google/callback -> Frontend
   - Protección CSRF con state aleatorio en cookie
   - Login automático si usuario existe (por Google ID o email)
-  - Registro automático si usuario nuevo (email verificado automáticamente)
+  - **Sin registro automático**: si el usuario no existe, el login por Google se rechaza
   - Vinculación de cuenta Google a cuenta existente por email
   - Redirección a frontend con tokens en URL (/auth/callback)
 
@@ -482,5 +481,5 @@ Carpeta `mobile/` vacía. Pendiente crear proyecto Android nativo con Kotlin.
 1. Integrar libreria de mapas (Leaflet) en frontend
 2. Integrar pasarela de pago (Transbank/MercadoPago)
 3. Implementar página /auth/callback en frontend para recibir tokens OAuth
-4. Iniciar backoffice
+4. Continuar backoffice (incluye gestión de usuarios)
 5. Iniciar app mobile Android

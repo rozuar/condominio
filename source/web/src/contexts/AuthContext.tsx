@@ -4,7 +4,6 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import {
   User,
   login as apiLogin,
-  register as apiRegister,
   getMe,
   saveTokens,
   getAccessToken,
@@ -18,7 +17,6 @@ interface AuthContextType {
   isLoading: boolean
   isAuthenticated: boolean
   login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string, name: string) => Promise<void>
   loginWithTokens: (accessToken: string, refreshToken: string) => Promise<void>
   logout: () => void
   getToken: () => string | null
@@ -65,12 +63,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(response.user)
   }
 
-  const register = async (email: string, password: string, name: string) => {
-    const response = await apiRegister(email, password, name)
-    saveTokens(response.access_token, response.refresh_token)
-    setUser(response.user)
-  }
-
   const loginWithTokens = async (accessToken: string, refreshToken: string) => {
     saveTokens(accessToken, refreshToken)
     const userData = await getMe(accessToken)
@@ -91,7 +83,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         isAuthenticated: !!user,
         login,
-        register,
         loginWithTokens,
         logout,
         getToken,

@@ -34,21 +34,6 @@ export async function login(email: string, password: string): Promise<AuthRespon
   return response.json()
 }
 
-export async function register(email: string, password: string, name: string): Promise<AuthResponse> {
-  const response = await fetch(`${API_URL}/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password, name }),
-  })
-
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.error || 'Registration failed')
-  }
-
-  return response.json()
-}
-
 export async function refreshTokens(refreshToken: string): Promise<AuthResponse> {
   const response = await fetch(`${API_URL}/auth/refresh`, {
     method: 'POST',
