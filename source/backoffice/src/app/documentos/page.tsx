@@ -111,9 +111,23 @@ export default function DocumentosPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{format(new Date(doc.created_at), "d MMM yyyy", { locale: es })}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800">
-                      <ExternalLink size={16} /> Ver
-                    </a>
+                    {/^https?:\/\//.test(doc.file_url) ? (
+                      <a
+                        href={doc.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                      >
+                        <ExternalLink size={16} /> Ver
+                      </a>
+                    ) : (
+                      <span
+                        className="inline-flex items-center gap-1 text-gray-400 cursor-not-allowed"
+                        title="El seed trae URLs relativas (ej: /documentos/...). Sube un link público (https://...) para evitar 404."
+                      >
+                        <ExternalLink size={16} /> Sin link
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}
