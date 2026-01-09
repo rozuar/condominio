@@ -235,7 +235,8 @@ export interface Votacion {
   requires_quorum: boolean
   quorum_percentage: number
   allow_abstention: boolean
-  opciones: VotacionOpcion[]
+  // NOTE: list endpoints may omit opciones; detail endpoints include them
+  opciones?: VotacionOpcion[]
   created_by?: string
   creator_name?: string
   created_at: string

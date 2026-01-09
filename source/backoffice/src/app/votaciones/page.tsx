@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { getVotaciones, createVotacion, updateVotacion, publishVotacion, closeVotacion, cancelVotacion, deleteVotacion, getVotacionResultados } from '@/lib/api'
+import { getVotaciones, getVotacion, createVotacion, updateVotacion, publishVotacion, closeVotacion, cancelVotacion, deleteVotacion, getVotacionResultados } from '@/lib/api'
 import type { Votacion, VotacionStatus, VotacionResultado } from '@/types'
 import { VOTACION_STATUS_LABELS, VOTACION_STATUS_COLORS } from '@/types'
 import { Plus, Pencil, Trash2, Loader2, Play, Square, Ban, BarChart3 } from 'lucide-react'
@@ -66,17 +66,31 @@ export default function VotacionesPage() {
     setShowModal(true)
   }
 
-  const openEditModal = (votacion: Votacion) => {
-    setSelectedVotacion(votacion)
-    setFormData({
-      title: votacion.title,
-      description: votacion.description || '',
-      requires_quorum: votacion.requires_quorum,
-      quorum_percentage: votacion.quorum_percentage,
-      allow_abstention: votacion.allow_abstention,
-      opciones: votacion.opciones.map(o => ({ label: o.label, description: o.description || '' })),
-    })
-    setShowModal(true)
+  const openEditModal = async (votacion: Votacion) => {
+    const token = getToken()
+    if (!token) return
+
+    setIsSaving(true)
+    try {
+      const full = await getVotacion(votacion.id, token)
+      setSelectedVotacion(full)
+      setFormData({
+        title: full.title,
+        description: full.description || '',
+        requires_quorum: full.requires_quorum,
+        quorum_percentage: full.quorum_percentage,
+        allow_abstention: full.allow_abstention,
+        opciones: (full.opciones?.length ? full.opciones : [{ label: '', description: '' }, { label: '', description: '' }]).map((o) => ({
+          label: o.label,
+          description: o.description || '',
+        })),
+      })
+      setShowModal(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al cargar votacion')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const openResultsModal = async (votacion: Votacion) => {
@@ -202,7 +216,7 @@ export default function VotacionesPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <Badge color={VOTACION_STATUS_COLORS[votacion.status]}>{VOTACION_STATUS_LABELS[votacion.status]}</Badge>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{votacion.opciones.length} opciones</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{votacion.opciones?.length ?? 0} opciones</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{votacion.total_votos || 0}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <div className="flex items-center justify-end gap-1">
