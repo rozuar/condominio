@@ -165,10 +165,11 @@ export default function LoginPage() {
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-600">
-            ¿No tienes cuenta?{' '}
-            <Link href="/auth/registro" className="text-primary font-medium hover:underline">
-              Registrate
+            ¿No tienes cuenta? Solicítala a la directiva desde{' '}
+            <Link href="/contacto" className="text-primary font-medium hover:underline">
+              Contacto
             </Link>
+            .
           </p>
         </div>
       </div>
