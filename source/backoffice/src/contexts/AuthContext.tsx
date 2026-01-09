@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const { user } = await getMe(accessToken)
+      const user = await getMe(accessToken)
       if (!BACKOFFICE_ALLOWED_ROLES.has(user.role)) {
         throw new Error('Acceso no autorizado')
       }
@@ -48,10 +48,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       if (refreshToken) {
         try {
-          const tokens = await refreshTokens(refreshToken)
-          localStorage.setItem('access_token', tokens.access_token)
-          localStorage.setItem('refresh_token', tokens.refresh_token)
-          const { user } = await getMe(tokens.access_token)
+          const resp = await refreshTokens(refreshToken)
+          localStorage.setItem('access_token', resp.access_token)
+          localStorage.setItem('refresh_token', resp.refresh_token)
+          const user = resp.user
           if (!BACKOFFICE_ALLOWED_ROLES.has(user.role)) {
             throw new Error('Acceso no autorizado')
           }

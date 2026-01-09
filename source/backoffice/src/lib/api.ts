@@ -13,7 +13,7 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: `Error ${response.status}` }))
-    throw new Error(error.message || `API Error: ${response.status}`)
+    throw new Error(error.message || error.error || `API Error: ${response.status}`)
   }
 
   return response.json()
@@ -36,26 +36,30 @@ async function fetchAPIAuth<T>(endpoint: string, token: string, options?: Reques
       throw new Error('No autorizado')
     }
     const error = await response.json().catch(() => ({ message: `Error ${response.status}` }))
-    throw new Error(error.message || `API Error: ${response.status}`)
+    throw new Error(error.message || error.error || `API Error: ${response.status}`)
   }
 
   return response.json()
 }
 
 // Auth
+import type { AuthResponse, User } from '@/types'
+
 export async function login(email: string, password: string) {
-  return fetchAPI<{ user: any; access_token: string; refresh_token: string }>('/auth/login', {
+  return fetchAPI<AuthResponse>('/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   })
 }
 
 export async function getMe(token: string) {
-  return fetchAPIAuth<{ user: any }>('/auth/me', token)
+  // API returns the user object directly
+  return fetchAPIAuth<User>('/auth/me', token)
 }
 
 export async function refreshTokens(refreshToken: string) {
-  return fetchAPI<{ access_token: string; refresh_token: string }>('/auth/refresh', {
+  // API returns the same shape as /auth/login
+  return fetchAPI<AuthResponse>('/auth/refresh', {
     method: 'POST',
     body: JSON.stringify({ refresh_token: refreshToken }),
   })
