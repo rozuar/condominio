@@ -11,6 +11,9 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
+  const showDevProfiles =
+    process.env.NEXT_PUBLIC_SHOW_DEV_PROFILES === 'true' || process.env.NODE_ENV === 'development'
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -124,7 +127,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {process.env.NODE_ENV === 'development' && (
+          {showDevProfiles && (
             <div className="mt-6 pt-6 border-t border-gray-200">
               <p className="text-xs text-gray-500 text-center mb-3">Modo desarrollo</p>
               <div className="grid grid-cols-2 gap-2">
@@ -147,7 +150,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-slate-500 text-sm mt-6">
-          Solo usuarios con rol directiva pueden acceder
+          Solo usuarios con rol directiva/admin pueden acceder
         </p>
       </div>
     </div>
