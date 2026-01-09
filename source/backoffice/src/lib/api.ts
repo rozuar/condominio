@@ -3,13 +3,18 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
 async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_URL}${endpoint}`
 
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
-  })
+  let response: Response
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers,
+      },
+    })
+  } catch {
+    throw new Error(`No se pudo conectar con la API (${API_URL}).`)
+  }
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: `Error ${response.status}` }))
@@ -22,14 +27,19 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
 async function fetchAPIAuth<T>(endpoint: string, token: string, options?: RequestInit): Promise<T> {
   const url = `${API_URL}${endpoint}`
 
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      ...options?.headers,
-    },
-  })
+  let response: Response
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        ...options?.headers,
+      },
+    })
+  } catch {
+    throw new Error(`No se pudo conectar con la API (${API_URL}).`)
+  }
 
   if (!response.ok) {
     if (response.status === 401) {
