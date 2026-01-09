@@ -179,7 +179,7 @@ export const DOCUMENTO_CATEGORY_COLORS: Record<DocumentoCategory, string> = {
   otro: 'bg-gray-100 text-gray-800',
 }
 
-export type UserRole = 'visitor' | 'vecino' | 'directiva'
+export type UserRole = 'visitor' | 'vecino' | 'directiva' | 'admin'
 
 export interface User {
   id: string

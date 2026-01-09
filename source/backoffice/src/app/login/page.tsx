@@ -29,25 +29,25 @@ export default function LoginPage() {
     {
       label: 'Admin',
       email: 'admin@vinapelvin.cl',
-      password: 'admin123',
+      password: 'password',
       icon: <Shield className="h-4 w-4" />,
     },
     {
       label: 'Presidente',
       email: 'presidente@vinapelvin.cl',
-      password: 'admin123',
+      password: 'password',
       icon: <Crown className="h-4 w-4" />,
     },
     {
       label: 'Tesorero',
       email: 'tesorero@vinapelvin.cl',
-      password: 'admin123',
+      password: 'password',
       icon: <Wallet className="h-4 w-4" />,
     },
     {
       label: 'Secretaria',
       email: 'secretaria@vinapelvin.cl',
-      password: 'admin123',
+      password: 'password',
       icon: <ClipboardList className="h-4 w-4" />,
     },
   ] as const
