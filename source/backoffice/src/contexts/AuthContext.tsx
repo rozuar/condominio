@@ -4,6 +4,8 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { login as apiLogin, getMe, refreshTokens } from '@/lib/api'
 import type { User } from '@/types'
 
+const BACKOFFICE_ALLOWED_ROLES = new Set(['directiva', 'admin'])
+
 interface AuthContextType {
   user: User | null
   isLoading: boolean
@@ -39,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const { user } = await getMe(accessToken)
-      if (user.role !== 'directiva') {
+      if (!BACKOFFICE_ALLOWED_ROLES.has(user.role)) {
         throw new Error('Acceso no autorizado')
       }
       setUser(user)
@@ -50,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.setItem('access_token', tokens.access_token)
           localStorage.setItem('refresh_token', tokens.refresh_token)
           const { user } = await getMe(tokens.access_token)
-          if (user.role !== 'directiva') {
+          if (!BACKOFFICE_ALLOWED_ROLES.has(user.role)) {
             throw new Error('Acceso no autorizado')
           }
           setUser(user)
@@ -67,8 +69,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     const response = await apiLogin(email, password)
 
-    if (response.user.role !== 'directiva') {
-      throw new Error('Solo usuarios con rol directiva pueden acceder al backoffice')
+    if (!BACKOFFICE_ALLOWED_ROLES.has(response.user.role)) {
+      throw new Error('Solo usuarios con rol directiva/admin pueden acceder al backoffice')
     }
 
     localStorage.setItem('access_token', response.access_token)
