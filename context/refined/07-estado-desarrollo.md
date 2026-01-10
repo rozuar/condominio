@@ -1,6 +1,6 @@
 # Estado del Desarrollo
 
-> Última actualización: 9 Enero 2026
+> Última actualización: 10 Enero 2026
 
 ## Resumen General
 
@@ -9,7 +9,7 @@
 | API (Go) | **Completo** | **100%** |
 | Frontend Web (Next.js) | En desarrollo | 90% |
 | Backoffice | En desarrollo | 50% |
-| Mobile (Android/Kotlin) | No iniciado | 0% |
+| Mobile (Android/Kotlin) | En desarrollo | 45% |
 | **Base de Datos** | **Schema listo** | **100%** |
 
 ---
@@ -362,9 +362,20 @@ Proyecto Next.js creado en `source/backoffice/` para panel de administración (d
 
 ## Mobile (Android/Kotlin)
 
-**Estado**: No iniciado
+**Estado**: En desarrollo
 
-Carpeta `mobile/` vacía. Pendiente crear proyecto Android nativo con Kotlin.
+Proyecto Android nativo en `source/mobile/` (Jetpack Compose + Hilt + Retrofit + FCM).
+
+### Implementado ✅
+- Auth (email/pass) con JWT (almacenamiento en DataStore)
+- Navegación base (Login → Home)
+- Módulos: Comunicados, Eventos, Emergencias, Votaciones, Gastos (mi cuenta), Tesorería, Actas, Documentos, Notificaciones, Contacto
+- Push: Firebase Cloud Messaging (topics + canales de notificación)
+
+### Pendiente 📌
+- Módulos: Galería, Mapa
+- Ajustes de UX según roles (modo visitante vs autenticado)
+- Registro de token FCM en backend (si se requiere push por usuario)
 
 ---
 
