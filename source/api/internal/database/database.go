@@ -48,6 +48,7 @@ func (db *DB) RunMigrations(ctx context.Context) error {
 		migrationComunicados,
 		migrationEventos,
 		migrationTesoreria,
+		migrationGastosComunes,
 		migrationActas,
 		migrationDocumentos,
 		migrationEmergencias,
@@ -141,6 +142,67 @@ CREATE TABLE IF NOT EXISTS movimientos_tesoreria (
 
 CREATE INDEX IF NOT EXISTS idx_tesoreria_date ON movimientos_tesoreria(date DESC);
 CREATE INDEX IF NOT EXISTS idx_tesoreria_type ON movimientos_tesoreria(type);
+`
+
+const migrationGastosComunes = `
+-- Minimal core dependency for Gastos Comunes
+CREATE TABLE IF NOT EXISTS parcelas (
+    id SERIAL PRIMARY KEY,
+    numero VARCHAR(50) NOT NULL,
+    direccion VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(numero)
+);
+
+CREATE INDEX IF NOT EXISTS idx_parcelas_numero ON parcelas(numero);
+
+-- Periodos de gasto común
+CREATE TABLE IF NOT EXISTS periodos_gasto (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    year INTEGER NOT NULL,
+    month INTEGER NOT NULL,
+    monto_base DECIMAL(12,2) NOT NULL,
+    fecha_vencimiento DATE NOT NULL,
+    descripcion TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(year, month)
+);
+
+-- Gastos comunes por parcela
+CREATE TABLE IF NOT EXISTS gastos_comunes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    periodo_id UUID NOT NULL REFERENCES periodos_gasto(id) ON DELETE CASCADE,
+    parcela_id INTEGER NOT NULL REFERENCES parcelas(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    monto DECIMAL(12,2) NOT NULL,
+    monto_pagado DECIMAL(12,2) NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'paid', 'overdue', 'cancelled')),
+    fecha_pago TIMESTAMP WITH TIME ZONE,
+    metodo_pago VARCHAR(50),
+    referencia_pago VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(periodo_id, parcela_id)
+);
+
+-- Pagos asociados a gastos comunes
+CREATE TABLE IF NOT EXISTS pagos (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    gasto_comun_id UUID NOT NULL REFERENCES gastos_comunes(id) ON DELETE CASCADE,
+    monto DECIMAL(12,2) NOT NULL,
+    metodo VARCHAR(50) NOT NULL,
+    referencia_externa VARCHAR(255),
+    estado VARCHAR(50) NOT NULL DEFAULT 'approved' CHECK (estado IN ('pending', 'approved', 'rejected')),
+    detalles JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_gastos_periodo ON gastos_comunes(periodo_id);
+CREATE INDEX IF NOT EXISTS idx_gastos_parcela ON gastos_comunes(parcela_id);
+CREATE INDEX IF NOT EXISTS idx_gastos_status ON gastos_comunes(status);
+CREATE INDEX IF NOT EXISTS idx_pagos_gasto ON pagos(gasto_comun_id);
 `
 
 const migrationActas = `
@@ -266,6 +328,22 @@ CREATE INDEX IF NOT EXISTS idx_galeria_items_galeria ON galeria_items(galeria_id
 `
 
 const migrationMapaPuntos = `
+CREATE TABLE IF NOT EXISTS mapa_areas (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    parcela_id INTEGER REFERENCES parcelas(id) ON DELETE CASCADE,
+    type VARCHAR(20) NOT NULL CHECK (type IN ('parcela', 'area_comun', 'acceso', 'canal', 'camino')),
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    coordinates JSONB NOT NULL,
+    center_lat DECIMAL(10, 8),
+    center_lng DECIMAL(11, 8),
+    fill_color VARCHAR(7) DEFAULT '#4A7C23',
+    stroke_color VARCHAR(7) DEFAULT '#2D5016',
+    is_clickable BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS mapa_puntos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) NOT NULL,
@@ -279,6 +357,8 @@ CREATE TABLE IF NOT EXISTS mapa_puntos (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+CREATE INDEX IF NOT EXISTS idx_mapa_areas_type ON mapa_areas(type);
+CREATE INDEX IF NOT EXISTS idx_mapa_areas_parcela ON mapa_areas(parcela_id);
 CREATE INDEX IF NOT EXISTS idx_mapa_puntos_type ON mapa_puntos(type);
 `
 
