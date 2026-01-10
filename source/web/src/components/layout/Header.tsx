@@ -15,6 +15,7 @@ const privateNavigation = [
   { name: 'Tesorería', href: '/tesoreria' },
   { name: 'Actas', href: '/actas' },
   { name: 'Documentos', href: '/documentos' },
+  { name: 'Votaciones', href: '/votaciones' },
 ]
 
 export default function Header() {
