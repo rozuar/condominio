@@ -7,8 +7,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+
+	"github.com/condominio/backend/internal/database"
 )
 
 func main() {
@@ -22,17 +23,29 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
 
-	pool, err := pgxpool.New(ctx, databaseURL)
+	db, err := database.New(databaseURL)
 	if err != nil {
 		log.Fatalf("Failed to connect: %v", err)
 	}
-	defer pool.Close()
+	defer db.Close()
+
+	// Ensure schema exists (seed can be run on a fresh DB)
+	log.Println("Running migrations...")
+	if err := db.RunMigrations(ctx); err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
+	}
+	log.Println("Migrations completed")
+
+	pool := db.Pool
 
 	log.Println("Connected to database, seeding data...")
 
 	// Clear existing data
 	log.Println("Clearing existing data...")
 	clearTables := []string{
+		"pagos",
+		"gastos_comunes",
+		"periodos_gasto",
 		"notificaciones",
 		"mensajes_contacto",
 		"galeria_items",
@@ -49,12 +62,36 @@ func main() {
 		"eventos",
 		"comunicados",
 		"users",
+		"parcelas",
 	}
 	for _, table := range clearTables {
 		_, err = pool.Exec(ctx, fmt.Sprintf("TRUNCATE TABLE %s CASCADE", table))
 		if err != nil {
 			log.Printf("Warning clearing %s: %v", table, err)
 		}
+	}
+
+	// ============================================
+	// PARCELAS (requerido para Gastos Comunes)
+	// ============================================
+	log.Println("Inserting parcelas...")
+	_, err = pool.Exec(ctx, `
+		INSERT INTO parcelas (id, numero, direccion) VALUES
+		(1, '1', 'Calle Los Álamos 101'),
+		(2, '2', 'Calle Los Álamos 102'),
+		(3, '3', 'Calle Los Álamos 103'),
+		(4, '4', 'Calle Los Álamos 104'),
+		(5, '5', 'Calle Los Álamos 105'),
+		(6, '6', 'Calle Los Álamos 106'),
+		(7, '7', 'Calle Los Álamos 107'),
+		(8, '8', 'Calle Los Álamos 108'),
+		(9, '9', 'Calle Los Álamos 109'),
+		(10, '10', 'Calle Los Álamos 110'),
+		(11, '11', 'Calle Los Álamos 111'),
+		(12, '12', 'Calle Los Álamos 112')
+	`)
+	if err != nil {
+		log.Printf("Warning inserting parcelas: %v", err)
 	}
 
 	// ============================================
@@ -183,6 +220,100 @@ func main() {
 		if err != nil {
 			log.Printf("Warning inserting movimiento: %v", err)
 		}
+	}
+
+	// ============================================
+	// GASTOS COMUNES - PERIODOS + GASTOS + PAGOS
+	// ============================================
+	log.Println("Inserting gastos comunes (periodos/gastos/pagos)...")
+	// Periodos (incluye meses anteriores y el actual)
+	_, err = pool.Exec(ctx, `
+		INSERT INTO periodos_gasto (id, year, month, monto_base, fecha_vencimiento, descripcion) VALUES
+		('90000000-0000-0000-0000-000000000010', 2025, 11, 65000, '2025-11-10', 'Gastos comunes Noviembre 2025'),
+		('90000000-0000-0000-0000-000000000011', 2025, 12, 68000, '2025-12-10', 'Gastos comunes Diciembre 2025'),
+		('90000000-0000-0000-0000-000000000012', 2026, 1, 70000, '2026-01-10', 'Gastos comunes Enero 2026'),
+		('90000000-0000-0000-0000-000000000013', 2026, 2, 70000, '2026-02-10', 'Gastos comunes Febrero 2026')
+	`)
+	if err != nil {
+		log.Printf("Warning inserting periodos_gasto: %v", err)
+	}
+
+	// Gastos por parcela (1..9) y por periodo (4)
+	// Mezclamos status para tener pagados / pendientes / vencidos
+	_, err = pool.Exec(ctx, `
+		INSERT INTO gastos_comunes (
+			id, periodo_id, parcela_id, user_id, monto, monto_pagado, status, fecha_pago, metodo_pago, referencia_pago
+		) VALUES
+		-- Noviembre 2025: varios pagados
+		('91000000-0000-0000-0000-000000000101', '90000000-0000-0000-0000-000000000010', 1, 'a0000000-0000-0000-0000-000000000002', 65000, 65000, 'paid', NOW() - INTERVAL '55 days', 'transferencia', 'TRX-2025-11-0001'),
+		('91000000-0000-0000-0000-000000000102', '90000000-0000-0000-0000-000000000010', 2, 'a0000000-0000-0000-0000-000000000003', 65000, 65000, 'paid', NOW() - INTERVAL '54 days', 'transferencia', 'TRX-2025-11-0002'),
+		('91000000-0000-0000-0000-000000000103', '90000000-0000-0000-0000-000000000010', 3, 'a0000000-0000-0000-0000-000000000004', 65000, 65000, 'paid', NOW() - INTERVAL '53 days', 'transferencia', 'TRX-2025-11-0003'),
+		('91000000-0000-0000-0000-000000000104', '90000000-0000-0000-0000-000000000010', 4, 'a0000000-0000-0000-0000-000000000005', 65000, 65000, 'paid', NOW() - INTERVAL '52 days', 'transferencia', 'TRX-2025-11-0004'),
+		('91000000-0000-0000-0000-000000000105', '90000000-0000-0000-0000-000000000010', 5, 'a0000000-0000-0000-0000-000000000006', 65000, 0, 'overdue', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000106', '90000000-0000-0000-0000-000000000010', 6, 'a0000000-0000-0000-0000-000000000007', 65000, 65000, 'paid', NOW() - INTERVAL '50 days', 'transferencia', 'TRX-2025-11-0006'),
+		('91000000-0000-0000-0000-000000000107', '90000000-0000-0000-0000-000000000010', 7, 'a0000000-0000-0000-0000-000000000008', 65000, 0, 'overdue', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000108', '90000000-0000-0000-0000-000000000010', 8, 'a0000000-0000-0000-0000-000000000009', 65000, 65000, 'paid', NOW() - INTERVAL '49 days', 'transferencia', 'TRX-2025-11-0008'),
+		('91000000-0000-0000-0000-000000000109', '90000000-0000-0000-0000-000000000010', 9, 'a0000000-0000-0000-0000-000000000010', 65000, 0, 'pending', NULL, NULL, NULL),
+
+		-- Diciembre 2025: algunos pagos parciales + vencidos
+		('91000000-0000-0000-0000-000000000201', '90000000-0000-0000-0000-000000000011', 1, 'a0000000-0000-0000-0000-000000000002', 68000, 68000, 'paid', NOW() - INTERVAL '25 days', 'transferencia', 'TRX-2025-12-0001'),
+		('91000000-0000-0000-0000-000000000202', '90000000-0000-0000-0000-000000000011', 2, 'a0000000-0000-0000-0000-000000000003', 68000, 68000, 'paid', NOW() - INTERVAL '24 days', 'transferencia', 'TRX-2025-12-0002'),
+		('91000000-0000-0000-0000-000000000203', '90000000-0000-0000-0000-000000000011', 3, 'a0000000-0000-0000-0000-000000000004', 68000, 34000, 'pending', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000204', '90000000-0000-0000-0000-000000000011', 4, 'a0000000-0000-0000-0000-000000000005', 68000, 0, 'overdue', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000205', '90000000-0000-0000-0000-000000000011', 5, 'a0000000-0000-0000-0000-000000000006', 68000, 68000, 'paid', NOW() - INTERVAL '20 days', 'transferencia', 'TRX-2025-12-0005'),
+		('91000000-0000-0000-0000-000000000206', '90000000-0000-0000-0000-000000000011', 6, 'a0000000-0000-0000-0000-000000000007', 68000, 0, 'pending', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000207', '90000000-0000-0000-0000-000000000011', 7, 'a0000000-0000-0000-0000-000000000008', 68000, 68000, 'paid', NOW() - INTERVAL '18 days', 'transferencia', 'TRX-2025-12-0007'),
+		('91000000-0000-0000-0000-000000000208', '90000000-0000-0000-0000-000000000011', 8, 'a0000000-0000-0000-0000-000000000009', 68000, 0, 'pending', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000209', '90000000-0000-0000-0000-000000000011', 9, 'a0000000-0000-0000-0000-000000000010', 68000, 68000, 'paid', NOW() - INTERVAL '16 days', 'transferencia', 'TRX-2025-12-0009'),
+
+		-- Enero 2026: periodo actual (mixto)
+		('91000000-0000-0000-0000-000000000301', '90000000-0000-0000-0000-000000000012', 1, 'a0000000-0000-0000-0000-000000000002', 70000, 70000, 'paid', NOW() - INTERVAL '5 days', 'transferencia', 'TRX-2026-01-0001'),
+		('91000000-0000-0000-0000-000000000302', '90000000-0000-0000-0000-000000000012', 2, 'a0000000-0000-0000-0000-000000000003', 70000, 0, 'pending', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000303', '90000000-0000-0000-0000-000000000012', 3, 'a0000000-0000-0000-0000-000000000004', 70000, 0, 'pending', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000304', '90000000-0000-0000-0000-000000000012', 4, 'a0000000-0000-0000-0000-000000000005', 70000, 70000, 'paid', NOW() - INTERVAL '3 days', 'transferencia', 'TRX-2026-01-0004'),
+		('91000000-0000-0000-0000-000000000305', '90000000-0000-0000-0000-000000000012', 5, 'a0000000-0000-0000-0000-000000000006', 70000, 0, 'pending', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000306', '90000000-0000-0000-0000-000000000012', 6, 'a0000000-0000-0000-0000-000000000007', 70000, 0, 'pending', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000307', '90000000-0000-0000-0000-000000000012', 7, 'a0000000-0000-0000-0000-000000000008', 70000, 35000, 'pending', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000308', '90000000-0000-0000-0000-000000000012', 8, 'a0000000-0000-0000-0000-000000000009', 70000, 0, 'pending', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000309', '90000000-0000-0000-0000-000000000012', 9, 'a0000000-0000-0000-0000-000000000010', 70000, 70000, 'paid', NOW() - INTERVAL '2 days', 'transferencia', 'TRX-2026-01-0009'),
+
+		-- Febrero 2026: futuro (todo pendiente)
+		('91000000-0000-0000-0000-000000000401', '90000000-0000-0000-0000-000000000013', 1, 'a0000000-0000-0000-0000-000000000002', 70000, 0, 'pending', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000402', '90000000-0000-0000-0000-000000000013', 2, 'a0000000-0000-0000-0000-000000000003', 70000, 0, 'pending', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000403', '90000000-0000-0000-0000-000000000013', 3, 'a0000000-0000-0000-0000-000000000004', 70000, 0, 'pending', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000404', '90000000-0000-0000-0000-000000000013', 4, 'a0000000-0000-0000-0000-000000000005', 70000, 0, 'pending', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000405', '90000000-0000-0000-0000-000000000013', 5, 'a0000000-0000-0000-0000-000000000006', 70000, 0, 'pending', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000406', '90000000-0000-0000-0000-000000000013', 6, 'a0000000-0000-0000-0000-000000000007', 70000, 0, 'pending', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000407', '90000000-0000-0000-0000-000000000013', 7, 'a0000000-0000-0000-0000-000000000008', 70000, 0, 'pending', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000408', '90000000-0000-0000-0000-000000000013', 8, 'a0000000-0000-0000-0000-000000000009', 70000, 0, 'pending', NULL, NULL, NULL),
+		('91000000-0000-0000-0000-000000000409', '90000000-0000-0000-0000-000000000013', 9, 'a0000000-0000-0000-0000-000000000010', 70000, 0, 'pending', NULL, NULL, NULL)
+	`)
+	if err != nil {
+		log.Printf("Warning inserting gastos_comunes: %v", err)
+	}
+
+	// Pagos asociados a los "paid"
+	_, err = pool.Exec(ctx, `
+		INSERT INTO pagos (gasto_comun_id, monto, metodo, referencia_externa, estado, detalles) VALUES
+		('91000000-0000-0000-0000-000000000101', 65000, 'transferencia', 'TRX-2025-11-0001', 'approved', '{"banco":"Banco Estado"}'::jsonb),
+		('91000000-0000-0000-0000-000000000102', 65000, 'transferencia', 'TRX-2025-11-0002', 'approved', '{"banco":"Banco Estado"}'::jsonb),
+		('91000000-0000-0000-0000-000000000103', 65000, 'transferencia', 'TRX-2025-11-0003', 'approved', '{"banco":"Banco Estado"}'::jsonb),
+		('91000000-0000-0000-0000-000000000104', 65000, 'transferencia', 'TRX-2025-11-0004', 'approved', '{"banco":"Banco Estado"}'::jsonb),
+		('91000000-0000-0000-0000-000000000106', 65000, 'transferencia', 'TRX-2025-11-0006', 'approved', '{"banco":"Banco Estado"}'::jsonb),
+		('91000000-0000-0000-0000-000000000108', 65000, 'transferencia', 'TRX-2025-11-0008', 'approved', '{"banco":"Banco Estado"}'::jsonb),
+
+		('91000000-0000-0000-0000-000000000201', 68000, 'transferencia', 'TRX-2025-12-0001', 'approved', '{"banco":"Banco Estado"}'::jsonb),
+		('91000000-0000-0000-0000-000000000202', 68000, 'transferencia', 'TRX-2025-12-0002', 'approved', '{"banco":"Banco Estado"}'::jsonb),
+		('91000000-0000-0000-0000-000000000205', 68000, 'transferencia', 'TRX-2025-12-0005', 'approved', '{"banco":"Banco Estado"}'::jsonb),
+		('91000000-0000-0000-0000-000000000207', 68000, 'transferencia', 'TRX-2025-12-0007', 'approved', '{"banco":"Banco Estado"}'::jsonb),
+		('91000000-0000-0000-0000-000000000209', 68000, 'transferencia', 'TRX-2025-12-0009', 'approved', '{"banco":"Banco Estado"}'::jsonb),
+
+		('91000000-0000-0000-0000-000000000301', 70000, 'transferencia', 'TRX-2026-01-0001', 'approved', '{"banco":"Banco Estado"}'::jsonb),
+		('91000000-0000-0000-0000-000000000304', 70000, 'transferencia', 'TRX-2026-01-0004', 'approved', '{"banco":"Banco Estado"}'::jsonb),
+		('91000000-0000-0000-0000-000000000309', 70000, 'transferencia', 'TRX-2026-01-0009', 'approved', '{"banco":"Banco Estado"}'::jsonb)
+	`)
+	if err != nil {
+		log.Printf("Warning inserting pagos (gastos comunes): %v", err)
 	}
 
 	// ============================================
@@ -453,7 +584,8 @@ func main() {
 	// Show summary
 	fmt.Println("\n=== RESUMEN DE DATOS INSERTADOS ===")
 	tables := []string{
-		"users", "comunicados", "eventos", "movimientos_tesoreria",
+		"parcelas", "users", "periodos_gasto", "gastos_comunes", "pagos",
+		"comunicados", "eventos", "movimientos_tesoreria",
 		"actas", "documentos", "emergencias", "votaciones",
 		"votacion_opciones", "votos", "galerias", "galeria_items",
 		"mapa_puntos", "mensajes_contacto", "notificaciones",

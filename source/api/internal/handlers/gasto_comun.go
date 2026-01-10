@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -48,6 +49,7 @@ func (h *GastoComunHandler) ListPeriodos(w http.ResponseWriter, r *http.Request)
 
 	resp, err := h.service.ListPeriodos(r.Context(), filter)
 	if err != nil {
+		log.Printf("ListPeriodos failed: %v", err)
 		writeError(w, http.StatusInternalServerError, "Failed to list periodos")
 		return
 	}

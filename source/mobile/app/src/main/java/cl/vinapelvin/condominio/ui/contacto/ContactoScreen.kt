@@ -77,7 +77,7 @@ fun ContactoScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Contacto") },
+                title = { Text("Contacto Directiva") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")

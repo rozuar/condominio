@@ -44,13 +44,13 @@ fun HomeScreen(
         MenuItem("Comunicados", Icons.Default.Campaign, NavRoutes.Comunicados.route, Blue600),
         MenuItem("Eventos", Icons.Default.Event, NavRoutes.Eventos.route, Green600),
         MenuItem("Emergencias", Icons.Default.Warning, NavRoutes.Emergencias.route, Red600),
+        MenuItem("Contacto Directiva", Icons.Default.Mail, NavRoutes.Contacto.route, Tierra),
         MenuItem("Votaciones", Icons.Default.HowToVote, NavRoutes.Votaciones.route, Amber500),
         MenuItem("Gastos", Icons.Default.Receipt, NavRoutes.Gastos.route, Blue700),
         MenuItem("Tesorería", Icons.Default.AccountBalance, NavRoutes.Tesoreria.route, Green600),
         MenuItem("Actas", Icons.Default.Description, NavRoutes.Actas.route, Blue800),
         MenuItem("Documentos", Icons.Default.Folder, NavRoutes.Documentos.route, Gray500),
         MenuItem("Notificaciones", Icons.Default.Notifications, NavRoutes.Notificaciones.route, Gray500, notificationCount),
-        MenuItem("Contacto", Icons.Default.Mail, NavRoutes.Contacto.route, Tierra),
     )
 
     Scaffold(
