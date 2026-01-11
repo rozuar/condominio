@@ -23,6 +23,11 @@ func main() {
 	cfg := config.Load()
 
 	log.Printf("Starting server in %s mode...", cfg.Env)
+	if cfg.Env == "production" && cfg.DatabaseURLDirect == "" {
+		log.Printf("WARNING: DATABASE_URL is not set; falling back to DB_HOST/DB_PORT (current host=%s port=%s db=%s)",
+			cfg.DBHost, cfg.DBPort, cfg.DBName,
+		)
+	}
 
 	// Connect to database
 	db, err := database.New(cfg.DatabaseURL())
