@@ -129,6 +129,8 @@ type ResumenGastos struct {
 }
 
 type MiEstadoCuenta struct {
+	HasParcela      bool           `json:"has_parcela"`
+	Message         string         `json:"message,omitempty"`
 	ParcelaID      int            `json:"parcela_id"`
 	ParcelaNumero  string         `json:"parcela_numero"`
 	GastosPendientes []GastoComun `json:"gastos_pendientes"`

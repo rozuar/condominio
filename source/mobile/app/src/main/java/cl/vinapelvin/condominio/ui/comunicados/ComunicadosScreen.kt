@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import cl.vinapelvin.condominio.data.model.Comunicado
+import cl.vinapelvin.condominio.data.model.effectivePriority
 import cl.vinapelvin.condominio.ui.theme.*
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -32,6 +33,7 @@ fun ComunicadosScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        containerColor = Gray50,
         topBar = {
             TopAppBar(
                 title = { Text("Comunicados") },
@@ -39,7 +41,12 @@ fun ComunicadosScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         }
     ) { paddingValues ->
@@ -97,7 +104,7 @@ fun ComunicadoCard(
     comunicado: Comunicado,
     onClick: () -> Unit
 ) {
-    val priorityColor = when (comunicado.priority) {
+    val priorityColor = when (comunicado.effectivePriority()) {
         "high" -> Red600
         "medium" -> Amber500
         else -> Green600

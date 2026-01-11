@@ -32,6 +32,7 @@
 - Pago online de gastos comunes
 - Visualización del estado de pago del vecino
 - Historial de pagos
+- **Condición (no error):** si el usuario autenticado **no tiene `parcela_id`**, el módulo debe mostrar el mensaje **“Ud no posee asociada una parcela que genere gastos”** y no bloquear el resto de la app.
 
 ### 5. Tesorería y Transparencia
 - Publicación mensual de:
@@ -88,21 +89,21 @@
 
 ## Matriz de Acceso por Sección
 
-| Sección | Visitante | Vecino | Directiva |
+| Sección | Visitante | Familia/Invitado | Vecino | Directiva |
 |---------|-----------|--------|-----------|
-| Inicio | Parcial | Completo | Completo |
-| Comunicados públicos | Si | Si | Si + Editar |
-| Comunicados privados | No | Si | Si + Editar |
-| Emergencias | Parcial | Completo | Completo + Crear |
-| Gastos comunes | No | Si | Si + Admin |
-| Tesorería | No | Si | Si + Editar |
-| Actas | No | Si | Si + Crear |
-| Votaciones | No | Si | Si + Crear |
-| Calendario | Parcial | Completo | Completo + Editar |
-| Mapa | Si | Si | Si |
-| Galería | Parcial | Completo | Completo + Editar |
-| Documentos | No | Si | Si + Editar |
-| Contacto | No | Si | Si + Ver mensajes |
+| Inicio | Parcial | Completo | Completo | Completo |
+| Comunicados públicos | Si | Si | Si | Si + Editar |
+| Comunicados privados | No | Si (según visibilidad) | Si | Si + Editar |
+| Emergencias | Parcial | Completo | Completo | Completo + Crear |
+| Gastos comunes | No | **Condicionado a parcela** | Si | Si + Admin |
+| Tesorería | No | No | Si | Si + Editar |
+| Actas | No | Si | Si | Si + Crear |
+| Votaciones | No | **Solo ver** | Si | Si + Crear |
+| Calendario | Parcial | Completo | Completo | Completo + Editar |
+| Mapa | Si | Si | Si | Si |
+| Galería | Parcial | Completo | Completo | Completo + Editar |
+| Documentos | No | Si | Si | Si + Editar |
+| Contacto | No | Si | Si | Si + Ver mensajes |
 
 ## Sistema de Notificaciones
 

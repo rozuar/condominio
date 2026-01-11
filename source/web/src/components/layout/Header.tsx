@@ -9,6 +9,7 @@ const publicNavigation = [
   { name: 'Inicio', href: '/' },
   { name: 'Comunicados', href: '/comunicados' },
   { name: 'Calendario', href: '/calendario' },
+  { name: 'Contacto Directiva', href: '/contacto' },
 ]
 
 const privateNavigation = [

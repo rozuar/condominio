@@ -14,6 +14,8 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
+  const showDevProfiles = process.env.NEXT_PUBLIC_SHOW_DEV_PROFILES === 'true'
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -29,19 +31,33 @@ export default function LoginPage() {
     }
   }
 
+  const loginWith = async (nextEmail: string, nextPassword: string) => {
+    setError('')
+    setEmail(nextEmail)
+    setPassword(nextPassword)
+    setIsLoading(true)
+
+    try {
+      await login(nextEmail, nextPassword)
+      router.push('/')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al iniciar sesion')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleGoogleLogin = () => {
     window.location.href = getGoogleAuthUrl()
   }
 
-  const fillTestCredentials = (role: 'admin' | 'directiva' | 'vecino') => {
-    const credentials = {
-      admin: { email: 'admin@vinapelvin.cl', password: 'password' },
-      directiva: { email: 'presidente@vinapelvin.cl', password: 'password' },
-      vecino: { email: 'juan.perez@email.com', password: 'password' },
-    }
-    setEmail(credentials[role].email)
-    setPassword(credentials[role].password)
-  }
+  const devProfiles = [
+    { key: 'admin', label: 'Admin', email: 'admin@vinapelvin.cl', password: 'password' },
+    { key: 'directiva', label: 'Directiva', email: 'presidente@vinapelvin.cl', password: 'password' },
+    { key: 'vecino', label: 'Vecino', email: 'juan.perez@email.com', password: 'password' },
+    { key: 'familia-sin-parcela', label: 'Familia (sin parcela)', email: 'familia.guest@email.com', password: 'password' },
+    { key: 'familia-con-parcela', label: 'Familia (parcela 4)', email: 'familia.parcela4@email.com', password: 'password' },
+  ] as const
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4">
@@ -86,31 +102,22 @@ export default function LoginPage() {
           </button>
 
           {/* Test Credentials - Solo para desarrollo */}
-          {process.env.NODE_ENV === 'development' && (
+          {showDevProfiles && (
             <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <p className="text-xs text-amber-700 font-medium mb-2">Usuarios de prueba:</p>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => fillTestCredentials('admin')}
-                  className="flex-1 text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 py-1.5 px-2 rounded transition-colors"
-                >
-                  Admin
-                </button>
-                <button
-                  type="button"
-                  onClick={() => fillTestCredentials('directiva')}
-                  className="flex-1 text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 py-1.5 px-2 rounded transition-colors"
-                >
-                  Directiva
-                </button>
-                <button
-                  type="button"
-                  onClick={() => fillTestCredentials('vecino')}
-                  className="flex-1 text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 py-1.5 px-2 rounded transition-colors"
-                >
-                  Vecino
-                </button>
+              <p className="text-xs text-amber-700 font-medium mb-2">Perfiles de prueba:</p>
+
+              <div className="grid grid-cols-2 gap-2">
+                {devProfiles.map((p) => (
+                  <button
+                    key={p.key}
+                    type="button"
+                    onClick={() => loginWith(p.email, p.password)}
+                    disabled={isLoading}
+                    className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 py-1.5 px-2 rounded transition-colors disabled:opacity-50"
+                  >
+                    {p.label}
+                  </button>
+                ))}
               </div>
             </div>
           )}

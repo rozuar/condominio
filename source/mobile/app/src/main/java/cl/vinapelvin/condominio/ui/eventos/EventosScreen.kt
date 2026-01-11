@@ -9,7 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,6 +34,7 @@ fun EventosScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        containerColor = Gray50,
         topBar = {
             TopAppBar(
                 title = { Text("Eventos") },
@@ -42,7 +42,12 @@ fun EventosScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         }
     ) { paddingValues ->
@@ -138,24 +143,6 @@ fun EventoCard(
                         labelColor = typeColor
                     )
                 )
-                if (evento.isMandatory) {
-                    AssistChip(
-                        onClick = {},
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Star,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = Red600
-                            )
-                        },
-                        label = { Text("Obligatorio", fontSize = 12.sp) },
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = Red600.copy(alpha = 0.1f),
-                            labelColor = Red600
-                        )
-                    )
-                }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -190,7 +177,7 @@ fun EventoCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = formatEventDate(evento.startDate),
+                    text = formatEventDate(evento.eventDate),
                     fontSize = 12.sp,
                     color = Gray500
                 )
@@ -209,7 +196,7 @@ fun EventoCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = evento.location,
+                    text = evento.location.ifBlank { "Sin ubicación" },
                     fontSize = 12.sp,
                     color = Gray500
                 )

@@ -12,12 +12,13 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-val Blue600 = Color(0xFF2563EB)
-val Blue700 = Color(0xFF1D4ED8)
-val Blue800 = Color(0xFF1E40AF)
-val Green600 = Color(0xFF16A34A)
-val Red600 = Color(0xFFDC2626)
-val Amber500 = Color(0xFFF59E0B)
+// Muted accent palette (avoid overly saturated "kids app" look)
+val Blue600 = Color(0xFF1F4B99)
+val Blue700 = Color(0xFF1B3F80)
+val Blue800 = Color(0xFF163462)
+val Green600 = Color(0xFF1E6B3A)
+val Red600 = Color(0xFFB3261E)
+val Amber500 = Color(0xFFC58F00)
 // Brand palette (docs)
 val VerdePrincipal = Color(0xFF2D5016)
 val VerdeClaro = Color(0xFF4A7C23)

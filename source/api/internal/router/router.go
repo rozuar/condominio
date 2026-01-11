@@ -178,16 +178,18 @@ func New(svc *Services, jwtManager *jwt.JWTManager, oauthCfg *OAuthConfig) *chi.
 		// Votaciones - protected (vecino+)
 		r.Route("/votaciones", func(r chi.Router) {
 			r.Use(authMiddleware.Authenticate)
-			r.Use(authMiddleware.RequireRole("vecino", "directiva"))
 
-			// Read endpoints (vecino+)
-			r.Get("/", votacionHandler.List)
-			r.Get("/active", votacionHandler.GetActive)
-			r.Get("/{id}", votacionHandler.GetByID)
-			r.Get("/{id}/resultados", votacionHandler.GetResultados)
+			// Read endpoints: vecino/directiva/familia (admin is always allowed by middleware)
+			r.Group(func(r chi.Router) {
+				r.Use(authMiddleware.RequireRole("vecino", "directiva", "familia"))
+				r.Get("/", votacionHandler.List)
+				r.Get("/active", votacionHandler.GetActive)
+				r.Get("/{id}", votacionHandler.GetByID)
+				r.Get("/{id}/resultados", votacionHandler.GetResultados)
 
-			// Voting endpoint (vecino+)
-			r.Post("/{id}/votar", votacionHandler.EmitirVoto)
+				// Vote endpoint: allowed roles, but parcela is enforced at service level
+				r.Post("/{id}/votar", votacionHandler.EmitirVoto)
+			})
 
 			// Admin endpoints (directiva only)
 			r.Group(func(r chi.Router) {

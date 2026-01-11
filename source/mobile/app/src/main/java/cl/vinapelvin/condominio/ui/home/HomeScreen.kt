@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.ExitToApp
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,22 +39,38 @@ fun HomeScreen(
     onLogout: () -> Unit
 ) {
     val userName by viewModel.userName.collectAsState(initial = "Usuario")
+    val userRole by viewModel.userRole.collectAsState(initial = "")
+    val userParcelaId by viewModel.userParcelaId.collectAsState(initial = null)
     val notificationCount by viewModel.notificationCount.collectAsState()
 
-    val menuItems = listOf(
+    val role = userRole.orEmpty()
+    val isVecinoODirectiva = role == "vecino" || role == "directiva" || role == "admin"
+
+    val publicItems = listOf(
         MenuItem("Comunicados", Icons.Default.Campaign, NavRoutes.Comunicados.route, Blue600),
         MenuItem("Eventos", Icons.Default.Event, NavRoutes.Eventos.route, Green600),
         MenuItem("Emergencias", Icons.Default.Warning, NavRoutes.Emergencias.route, Red600),
-        MenuItem("Contacto Directiva", Icons.Default.Mail, NavRoutes.Contacto.route, Tierra),
+    )
+
+    val protectedItems = listOf(
         MenuItem("Votaciones", Icons.Default.HowToVote, NavRoutes.Votaciones.route, Amber500),
+        // Gastos requiere parcela asociada
         MenuItem("Gastos", Icons.Default.Receipt, NavRoutes.Gastos.route, Blue700),
         MenuItem("Tesorería", Icons.Default.AccountBalance, NavRoutes.Tesoreria.route, Green600),
         MenuItem("Actas", Icons.Default.Description, NavRoutes.Actas.route, Blue800),
         MenuItem("Documentos", Icons.Default.Folder, NavRoutes.Documentos.route, Gray500),
         MenuItem("Notificaciones", Icons.Default.Notifications, NavRoutes.Notificaciones.route, Gray500, notificationCount),
+        MenuItem("Contacto Directiva", Icons.Default.Mail, NavRoutes.Contacto.route, Tierra),
     )
 
+    val filteredProtectedItems =
+        if (userParcelaId == null) protectedItems.filterNot { it.route == NavRoutes.Gastos.route }
+        else protectedItems
+
+    val menuItems = if (isVecinoODirectiva) publicItems + filteredProtectedItems else publicItems
+
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
@@ -78,20 +95,51 @@ fun HomeScreen(
             )
         }
     ) { paddingValues ->
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(menuItems) { item ->
-                MenuCard(
-                    item = item,
-                    onClick = { onNavigate(item.route) }
-                )
+            if (!isVecinoODirectiva && role.isNotBlank()) {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    border = BorderStroke(1.dp, Gray100),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Acceso limitado",
+                            fontWeight = FontWeight.SemiBold,
+                            color = Gray900
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Esta app móvil está pensada para vecinos y directiva. Tu rol actual: $role.",
+                            color = Gray500,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(menuItems) { item ->
+                    MenuCard(
+                        item = item,
+                        onClick = { onNavigate(item.route) }
+                    )
+                }
             }
         }
     }
@@ -109,8 +157,9 @@ fun MenuCard(
             .aspectRatio(1f)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, Gray100),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -123,8 +172,8 @@ fun MenuCard(
                 Icon(
                     imageVector = item.icon,
                     contentDescription = item.title,
-                    modifier = Modifier.size(48.dp),
-                    tint = item.color
+                    modifier = Modifier.size(44.dp),
+                    tint = item.color.copy(alpha = 0.9f)
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(

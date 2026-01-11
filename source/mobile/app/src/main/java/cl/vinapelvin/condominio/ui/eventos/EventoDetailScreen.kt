@@ -29,6 +29,7 @@ fun EventoDetailScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        containerColor = Gray50,
         topBar = {
             TopAppBar(
                 title = { Text("Detalle del Evento") },
@@ -36,7 +37,12 @@ fun EventoDetailScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         }
     ) { paddingValues ->
@@ -99,24 +105,6 @@ fun EventoDetailScreen(
                                     labelColor = typeColor
                                 )
                             )
-                            if (evento.isMandatory) {
-                                AssistChip(
-                                    onClick = {},
-                                    leadingIcon = {
-                                        Icon(
-                                            Icons.Default.Star,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(16.dp),
-                                            tint = Red600
-                                        )
-                                    },
-                                    label = { Text("Obligatorio") },
-                                    colors = AssistChipDefaults.assistChipColors(
-                                        containerColor = Red600.copy(alpha = 0.1f),
-                                        labelColor = Red600
-                                    )
-                                )
-                            }
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -153,7 +141,7 @@ fun EventoDetailScreen(
                                             color = Gray500
                                         )
                                         Text(
-                                            formatDateTime(evento.startDate),
+                                            formatDateTime(evento.eventDate),
                                             fontWeight = FontWeight.Medium,
                                             color = Gray900
                                         )
@@ -178,7 +166,7 @@ fun EventoDetailScreen(
                                             color = Gray500
                                         )
                                         Text(
-                                            formatDateTime(evento.endDate),
+                                            evento.eventEndDate?.let { formatDateTime(it) } ?: "Sin término",
                                             fontWeight = FontWeight.Medium,
                                             color = Gray900
                                         )
@@ -203,7 +191,7 @@ fun EventoDetailScreen(
                                             color = Gray500
                                         )
                                         Text(
-                                            evento.location,
+                                            evento.location.ifBlank { "Sin ubicación" },
                                             fontWeight = FontWeight.Medium,
                                             color = Gray900
                                         )

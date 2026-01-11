@@ -29,6 +29,7 @@ fun GastosScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        containerColor = Gray50,
         topBar = {
             TopAppBar(
                 title = { Text("Mis Gastos") },
@@ -37,6 +38,12 @@ fun GastosScreen(
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
                 }
+                ,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         }
     ) { paddingValues ->
@@ -63,6 +70,30 @@ fun GastosScreen(
                 }
                 uiState.estadoCuenta != null -> {
                     val estado = uiState.estadoCuenta!!
+                    if (!estado.hasParcela) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = estado.message ?: "Ud no posee asociada una parcela que genere gastos",
+                                color = Gray900,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(onClick = { viewModel.loadEstadoCuenta() }) {
+                                Text("Reintentar")
+                            }
+                        }
+                        return@Box
+                    }
+                    val gastosOverdue = estado.gastosPendientes.filter { it.status == "overdue" }
+                    val gastosPending = estado.gastosPendientes.filter { it.status != "overdue" }
+                    val totalOverdue = gastosOverdue.sumOf { (it.monto - it.montoPagado).coerceAtLeast(0.0) }
+                    val totalPending = gastosPending.sumOf { (it.monto - it.montoPagado).coerceAtLeast(0.0) }
 
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
@@ -77,21 +108,30 @@ fun GastosScreen(
                             ) {
                                 SummaryCard(
                                     title = "Pendiente",
-                                    amount = estado.totalPending,
+                                    amount = totalPending,
                                     color = Amber500,
                                     modifier = Modifier.weight(1f)
                                 )
                                 SummaryCard(
                                     title = "Vencido",
-                                    amount = estado.totalOverdue,
+                                    amount = totalOverdue,
                                     color = Red600,
                                     modifier = Modifier.weight(1f)
                                 )
                             }
                         }
 
+                        item {
+                            SummaryCard(
+                                title = "Pagado",
+                                amount = estado.totalPagado,
+                                color = Green600,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
                         // Pending section
-                        if (estado.gastosPending.isNotEmpty()) {
+                        if (gastosPending.isNotEmpty()) {
                             item {
                                 Text(
                                     "Pendientes",
@@ -100,13 +140,13 @@ fun GastosScreen(
                                     color = Gray900
                                 )
                             }
-                            items(estado.gastosPending) { gasto ->
-                                GastoCard(gasto)
+                            items(gastosPending) { gasto ->
+                                GastoCard(gasto, estado.parcelaNumero)
                             }
                         }
 
                         // Overdue section
-                        if (estado.gastosOverdue.isNotEmpty()) {
+                        if (gastosOverdue.isNotEmpty()) {
                             item {
                                 Text(
                                     "Vencidos",
@@ -115,12 +155,12 @@ fun GastosScreen(
                                     color = Red600
                                 )
                             }
-                            items(estado.gastosOverdue) { gasto ->
-                                GastoCard(gasto)
+                            items(gastosOverdue) { gasto ->
+                                GastoCard(gasto, estado.parcelaNumero)
                             }
                         }
 
-                        if (estado.gastosPending.isEmpty() && estado.gastosOverdue.isEmpty()) {
+                        if (estado.gastosPendientes.isEmpty()) {
                             item {
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
@@ -173,12 +213,16 @@ fun SummaryCard(
 }
 
 @Composable
-fun GastoCard(gasto: GastoComun) {
+fun GastoCard(gasto: GastoComun, parcelaNumeroFallback: String) {
     val statusColor = when (gasto.status) {
         "pending" -> Amber500
         "overdue" -> Red600
         "paid" -> Green600
         else -> Gray500
+    }
+    val montoPendiente = (gasto.monto - gasto.montoPagado).coerceAtLeast(0.0)
+    val periodoLabel = gasto.periodo?.let { p ->
+        if (p.year > 0 && p.month > 0) "%04d-%02d".format(p.year, p.month) else null
     }
 
     Card(
@@ -196,19 +240,19 @@ fun GastoCard(gasto: GastoComun) {
         ) {
             Column {
                 Text(
-                    "Parcela ${gasto.parcelaId}",
+                    "Parcela ${gasto.parcelaNumero ?: parcelaNumeroFallback}",
                     fontWeight = FontWeight.Medium,
                     color = Gray900
                 )
                 Text(
-                    "Vence: ${gasto.fechaVencimiento.take(10)}",
+                    periodoLabel?.let { "Periodo: $it" } ?: "Periodo: -",
                     fontSize = 12.sp,
                     color = Gray500
                 )
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    formatCurrency(gasto.montoTotal),
+                    formatCurrency(montoPendiente),
                     fontWeight = FontWeight.Bold,
                     color = statusColor
                 )

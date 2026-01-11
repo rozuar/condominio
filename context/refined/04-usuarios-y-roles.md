@@ -68,6 +68,27 @@
 - Ver mensajes de contacto
 - Administrar usuarios
 
+### 4. Familia / Invitado (Autenticado)
+**Descripción:** Usuario autenticado perteneciente a una familia asociada al condominio, o invitado interno. Puede existir **sin parcela asignada** (p. ej. familiares que usan la app, cuidadores, etc.).
+
+**Permisos (app móvil / web):**
+- Ver comunicados y eventos (según visibilidad del contenido)
+- Ver avisos/alertas de emergencias
+- Contactar a la directiva
+- Acceder a menús generales de información
+
+**Restricciones:**
+- Si **no tiene `parcela_id`**, **no tiene Gastos Comunes** (no es error; se muestra estado informativo)
+- No administra tesorería/finanzas
+- No administra usuarios ni contenido
+
+## Condición: usuario sin parcela (Gastos Comunes)
+
+- **Contexto**: la parcela representa una unidad que “genera gastos”. Es normal que existan cuentas internas **sin parcela**.
+- **Comportamiento esperado**:
+  - El módulo “Gastos” debe mostrar un estado informativo (no error): **“Ud no posee asociada una parcela que genere gastos”**.
+  - El usuario mantiene acceso a módulos generales.
+
 ## Alta de usuarios (sin auto-registro)
 
 Las cuentas **no se crean desde la web pública**. La directiva debe:
@@ -85,3 +106,22 @@ Las cuentas **no se crean desde la web pública**. La directiva debe:
 - Protección contra ataques CSRF
 - Rate limiting en endpoints críticos
 - Logs de acceso y auditoría
+
+## Matriz resumida de acceso (móvil)
+
+| Módulo | Público | Familia/Invitado | Vecino | Directiva | Admin |
+|---|---:|---:|---:|---:|---:|
+| Comunicados | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Eventos | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Emergencias | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Contacto Directiva | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Actas | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Documentos | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Notificaciones | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Votaciones | ❌ | ✅ (solo ver)* | ✅ | ✅ | ✅ |
+| Tesorería | ❌ | ❌ | ✅ | ✅ | ✅ |
+| Gastos | ❌ | ✅* | ✅ | ✅ | ✅ |
+
+\* **Si no hay `parcela_id`**:
+- **Gastos**: no hay gasto asociado y se muestra estado informativo.
+- **Votaciones**: solo lectura (ver estado/resultados), **no puede votar**.

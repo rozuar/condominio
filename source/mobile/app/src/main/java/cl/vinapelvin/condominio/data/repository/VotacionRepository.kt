@@ -48,11 +48,11 @@ class VotacionRepository @Inject constructor(
         }
     }
 
-    suspend fun votar(votacionId: String, optionId: String): Result<Votacion> {
+    suspend fun votar(votacionId: String, optionId: String): Result<Unit> {
         return try {
-            val response = apiService.votar(votacionId, VoteRequest(optionId))
+            val response = apiService.votar(votacionId, VoteRequest(optionId = optionId, isAbstention = false))
             if (response.isSuccessful) {
-                Result.Success(response.body()!!)
+                Result.Success(Unit)
             } else {
                 Result.Error("Error al emitir voto")
             }

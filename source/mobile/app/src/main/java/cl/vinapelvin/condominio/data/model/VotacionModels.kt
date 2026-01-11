@@ -6,24 +6,26 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class VotacionOpcion(
     val id: String,
-    val text: String,
-    val votes: Int = 0
+    @SerialName("label") val text: String,
+    @SerialName("votos_count") val votes: Int = 0
 )
 
 @Serializable
 data class Votacion(
     val id: String,
     val title: String,
-    val description: String,
-    val options: List<VotacionOpcion>,
-    @SerialName("start_date") val startDate: String,
-    @SerialName("end_date") val endDate: String,
+    val description: String = "",
+    @SerialName("opciones") val options: List<VotacionOpcion> = emptyList(),
+    @SerialName("start_date") val startDate: String? = null,
+    @SerialName("end_date") val endDate: String? = null,
     val status: String,
     @SerialName("requires_quorum") val requiresQuorum: Boolean,
     @SerialName("quorum_percentage") val quorumPercentage: Int,
-    @SerialName("user_voted") val userVoted: Boolean = false,
-    @SerialName("user_vote") val userVote: String? = null,
-    @SerialName("created_at") val createdAt: String
+    @SerialName("allow_abstention") val allowAbstention: Boolean = true,
+    @SerialName("total_votos") val totalVotes: Int = 0,
+    @SerialName("has_voted") val userVoted: Boolean = false,
+    @SerialName("created_at") val createdAt: String,
+    @SerialName("updated_at") val updatedAt: String? = null
 )
 
 @Serializable
@@ -36,15 +38,31 @@ data class VotacionListResponse(
 
 @Serializable
 data class VoteRequest(
-    @SerialName("option_id") val optionId: String
+    // Backend expects "opcion_id" and "is_abstention"
+    @SerialName("opcion_id") val optionId: String? = null,
+    @SerialName("is_abstention") val isAbstention: Boolean = false
+)
+
+@Serializable
+data class VoteResponse(
+    val message: String
 )
 
 @Serializable
 data class VotacionResultado(
-    @SerialName("votacion_id") val votacionId: String,
-    @SerialName("total_votes") val totalVotes: Int,
-    @SerialName("total_eligible") val totalEligible: Int,
-    val participation: Double,
-    @SerialName("quorum_met") val quorumMet: Boolean,
-    val results: List<VotacionOpcion>
+    val votacion: Votacion,
+    @SerialName("total_votos") val totalVotos: Int,
+    @SerialName("total_abstenciones") val totalAbstenciones: Int,
+    @SerialName("resultados") val resultados: List<OpcionResultado>,
+    @SerialName("quorum_alcanzado") val quorumAlcanzado: Boolean,
+    @SerialName("total_vecinos") val totalVecinos: Int,
+    @SerialName("participacion") val participacion: Double
+)
+
+@Serializable
+data class OpcionResultado(
+    @SerialName("opcion_id") val opcionId: String,
+    val label: String,
+    val count: Int,
+    val percentage: Double
 )

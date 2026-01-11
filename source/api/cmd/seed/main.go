@@ -100,11 +100,13 @@ func main() {
 	log.Println("Inserting users...")
 	_, err = pool.Exec(ctx, `
 		INSERT INTO users (id, email, password_hash, name, role, parcela_id, email_verified) VALUES
-		('a0000000-0000-0000-0000-000000000001', 'admin@vinapelvin.cl', '$2a$10$QQ/g64VCks/027EZYEh.XeGfr.PVTUHhG9aoEdDeg/bD/i5p3idgm', 'Carlos Mendoza', 'admin', NULL, true),
+		('a0000000-0000-0000-0000-000000000001', 'admin@vinapelvin.cl', '$2a$10$QQ/g64VCks/027EZYEh.XeGfr.PVTUHhG9aoEdDeg/bD/i5p3idgm', 'Carlos Mendoza', 'admin', 1, true),
 		('a0000000-0000-0000-0000-000000000002', 'presidente@vinapelvin.cl', '$2a$10$QQ/g64VCks/027EZYEh.XeGfr.PVTUHhG9aoEdDeg/bD/i5p3idgm', 'María González', 'directiva', 1, true),
 		('a0000000-0000-0000-0000-000000000003', 'tesorero@vinapelvin.cl', '$2a$10$QQ/g64VCks/027EZYEh.XeGfr.PVTUHhG9aoEdDeg/bD/i5p3idgm', 'Roberto Silva', 'directiva', 2, true),
 		('a0000000-0000-0000-0000-000000000004', 'secretaria@vinapelvin.cl', '$2a$10$QQ/g64VCks/027EZYEh.XeGfr.PVTUHhG9aoEdDeg/bD/i5p3idgm', 'Ana Martínez', 'directiva', 3, true),
 		('a0000000-0000-0000-0000-000000000005', 'juan.perez@email.com', '$2a$10$QQ/g64VCks/027EZYEh.XeGfr.PVTUHhG9aoEdDeg/bD/i5p3idgm', 'Juan Pérez', 'vecino', 4, true),
+		('a0000000-0000-0000-0000-000000000011', 'familia.guest@email.com', '$2a$10$QQ/g64VCks/027EZYEh.XeGfr.PVTUHhG9aoEdDeg/bD/i5p3idgm', 'Invitado Familia', 'familia', NULL, true),
+		('a0000000-0000-0000-0000-000000000012', 'familia.parcela4@email.com', '$2a$10$QQ/g64VCks/027EZYEh.XeGfr.PVTUHhG9aoEdDeg/bD/i5p3idgm', 'Familia Parcela 4', 'familia', 4, true),
 		('a0000000-0000-0000-0000-000000000006', 'laura.rojas@email.com', '$2a$10$QQ/g64VCks/027EZYEh.XeGfr.PVTUHhG9aoEdDeg/bD/i5p3idgm', 'Laura Rojas', 'vecino', 5, true),
 		('a0000000-0000-0000-0000-000000000007', 'pedro.castro@email.com', '$2a$10$QQ/g64VCks/027EZYEh.XeGfr.PVTUHhG9aoEdDeg/bD/i5p3idgm', 'Pedro Castro', 'vecino', 6, true),
 		('a0000000-0000-0000-0000-000000000008', 'carmen.lopez@email.com', '$2a$10$QQ/g64VCks/027EZYEh.XeGfr.PVTUHhG9aoEdDeg/bD/i5p3idgm', 'Carmen López', 'vecino', 7, true),

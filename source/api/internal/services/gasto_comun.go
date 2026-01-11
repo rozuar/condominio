@@ -392,7 +392,17 @@ func (s *GastoComunService) GetMiEstadoCuenta(ctx context.Context, userID string
 		JOIN users u ON u.parcela_id = p.id
 		WHERE u.id = $1`, userID).Scan(&parcelaID, &parcelaNumero)
 	if err != nil {
-		return nil, errors.New("user has no associated parcela")
+		// Not an error: user can exist without parcela (family/guest accounts)
+		return &models.MiEstadoCuenta{
+			HasParcela:       false,
+			Message:          "Ud no posee asociada una parcela que genere gastos",
+			ParcelaID:        0,
+			ParcelaNumero:    "",
+			GastosPendientes: []models.GastoComun{},
+			GastosPagados:    []models.GastoComun{},
+			TotalPendiente:   0,
+			TotalPagado:      0,
+		}, nil
 	}
 
 	// Get pending gastos
@@ -473,6 +483,7 @@ func (s *GastoComunService) GetMiEstadoCuenta(ctx context.Context, userID string
 	}
 
 	return &models.MiEstadoCuenta{
+		HasParcela:       true,
 		ParcelaID:        parcelaID,
 		ParcelaNumero:    parcelaNumero,
 		GastosPendientes: gastosPendientes,
