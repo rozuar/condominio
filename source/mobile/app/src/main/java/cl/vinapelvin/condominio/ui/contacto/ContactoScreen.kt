@@ -75,6 +75,7 @@ fun ContactoScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text("Contacto Directiva") },

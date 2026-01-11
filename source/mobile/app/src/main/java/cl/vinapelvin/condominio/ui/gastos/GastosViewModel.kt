@@ -2,7 +2,7 @@ package cl.vinapelvin.condominio.ui.gastos
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import cl.vinapelvin.condominio.data.model.EstadoCuenta
+import cl.vinapelvin.condominio.data.model.MiEstadoCuenta
 import cl.vinapelvin.condominio.data.repository.GastosRepository
 import cl.vinapelvin.condominio.data.repository.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 data class GastosUiState(
     val isLoading: Boolean = false,
-    val estadoCuenta: EstadoCuenta? = null,
+    val estadoCuenta: MiEstadoCuenta? = null,
     val error: String? = null
 )
 

@@ -7,13 +7,16 @@ import kotlinx.serialization.Serializable
 data class Evento(
     val id: String,
     val title: String,
-    val description: String,
-    val location: String,
-    @SerialName("start_date") val startDate: String,
-    @SerialName("end_date") val endDate: String,
+    val description: String = "",
+    val location: String = "",
+    @SerialName("event_date") val eventDate: String,
+    @SerialName("event_end_date") val eventEndDate: String? = null,
     val type: String,
-    @SerialName("is_mandatory") val isMandatory: Boolean,
-    @SerialName("created_at") val createdAt: String
+    @SerialName("is_public") val isPublic: Boolean = true,
+    @SerialName("created_by") val createdBy: String? = null,
+    @SerialName("creator_name") val creatorName: String? = null,
+    @SerialName("created_at") val createdAt: String,
+    @SerialName("updated_at") val updatedAt: String? = null
 )
 
 @Serializable

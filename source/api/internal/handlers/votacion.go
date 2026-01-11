@@ -227,6 +227,8 @@ func (h *VotacionHandler) EmitirVoto(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusBadRequest, "Invalid option")
 		case errors.Is(err, services.ErrAbstentionNotAllowed):
 			writeError(w, http.StatusBadRequest, "Abstention is not allowed")
+		case errors.Is(err, services.ErrUserNoParcela):
+			writeError(w, http.StatusForbidden, "Para votar debe tener una parcela asociada")
 		default:
 			writeError(w, http.StatusInternalServerError, "Failed to emit vote")
 		}

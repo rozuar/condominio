@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, FileText, Calendar, Shield, CreditCard } from 'lucide-react'
+import { ArrowRight, FileText, Calendar, Shield, CreditCard, Mail } from 'lucide-react'
 import { getLatestComunicados, getUpcomingEventos } from '@/lib/api'
 import ComunicadoCard from '@/components/comunicados/ComunicadoCard'
 import EventoCard from '@/components/calendario/EventoCard'
@@ -26,6 +26,7 @@ const quickLinks = [
   { name: 'Calendario', href: '/calendario', icon: Calendar, description: 'Próximos eventos' },
   { name: 'Emergencias', href: '/emergencias', icon: Shield, description: 'Avisos urgentes' },
   { name: 'Gastos Comunes', href: '/gastos', icon: CreditCard, description: 'Pagar en línea' },
+  { name: 'Contacto Directiva', href: '/contacto', icon: Mail, description: 'Enviar mensaje' },
 ]
 
 export default async function HomePage() {

@@ -16,6 +16,7 @@ var (
 	ErrAlreadyVoted        = errors.New("user has already voted")
 	ErrInvalidOpcion       = errors.New("invalid option for this votacion")
 	ErrAbstentionNotAllowed = errors.New("abstention is not allowed")
+	ErrUserNoParcela       = errors.New("user has no associated parcela")
 )
 
 type VotacionService struct {
@@ -346,6 +347,15 @@ func (s *VotacionService) Cancel(ctx context.Context, id string) (*models.Votaci
 }
 
 func (s *VotacionService) EmitirVoto(ctx context.Context, votacionID string, userID string, req *models.EmitirVotoRequest) error {
+	// Condition: user must have parcela to be allowed to vote
+	var parcelaID *int
+	if err := s.db.Pool.QueryRow(ctx, `SELECT parcela_id FROM users WHERE id = $1`, userID).Scan(&parcelaID); err != nil {
+		return err
+	}
+	if parcelaID == nil {
+		return ErrUserNoParcela
+	}
+
 	votacion, err := s.GetByID(ctx, votacionID, &userID)
 	if err != nil {
 		return err

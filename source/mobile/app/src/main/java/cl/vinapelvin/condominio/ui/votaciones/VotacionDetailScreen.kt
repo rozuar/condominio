@@ -28,12 +28,14 @@ fun VotacionDetailScreen(
     onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val userParcelaId by viewModel.userParcelaId.collectAsState(initial = null)
 
     LaunchedEffect(votacionId) {
         viewModel.loadVotacion(votacionId)
     }
 
     Scaffold(
+        containerColor = Gray50,
         topBar = {
             TopAppBar(
                 title = { Text("Votacion") },
@@ -41,7 +43,12 @@ fun VotacionDetailScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         }
     ) { paddingValues ->
@@ -63,6 +70,7 @@ fun VotacionDetailScreen(
                 }
                 uiState.votacion != null -> {
                     val votacion = uiState.votacion!!
+                    val canVote = userParcelaId != null
 
                     Column(
                         modifier = Modifier
@@ -125,10 +133,10 @@ fun VotacionDetailScreen(
                                 option = option,
                                 isSelected = uiState.selectedOptionId == option.id,
                                 hasVoted = votacion.userVoted,
-                                userVote = votacion.userVote,
                                 isActive = votacion.status == "active",
+                                canVote = canVote,
                                 onClick = {
-                                    if (!votacion.userVoted && votacion.status == "active") {
+                                    if (canVote && !votacion.userVoted && votacion.status == "active") {
                                         viewModel.selectOption(option.id)
                                     }
                                 }
@@ -138,6 +146,22 @@ fun VotacionDetailScreen(
 
                         if (!votacion.userVoted && votacion.status == "active") {
                             Spacer(modifier = Modifier.height(16.dp))
+
+                            if (!canVote) {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = Amber500.copy(alpha = 0.10f)
+                                    )
+                                ) {
+                                    Text(
+                                        text = "Solo puedes ver el estado de la votación. Para votar debes tener una parcela asociada.",
+                                        modifier = Modifier.padding(16.dp),
+                                        color = Gray900
+                                    )
+                                }
+                                return@Column
+                            }
 
                             Button(
                                 onClick = { viewModel.submitVote(votacionId) },
@@ -194,13 +218,11 @@ fun OptionCard(
     option: VotacionOpcion,
     isSelected: Boolean,
     hasVoted: Boolean,
-    userVote: String?,
     isActive: Boolean,
+    canVote: Boolean,
     onClick: () -> Unit
 ) {
-    val isUserVote = userVote == option.id
     val borderColor = when {
-        isUserVote -> Green600
         isSelected -> Blue600
         else -> Gray100
     }
@@ -210,10 +232,10 @@ fun OptionCard(
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(2.dp, borderColor),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected || isUserVote) borderColor.copy(alpha = 0.1f) else Color.White
+            containerColor = if (isSelected) borderColor.copy(alpha = 0.1f) else Color.White
         ),
         onClick = onClick,
-        enabled = !hasVoted && isActive
+        enabled = canVote && !hasVoted && isActive
     ) {
         Row(
             modifier = Modifier
@@ -224,15 +246,15 @@ fun OptionCard(
         ) {
             Text(
                 text = option.text,
-                fontWeight = if (isSelected || isUserVote) FontWeight.SemiBold else FontWeight.Normal,
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                 color = Gray900
             )
 
-            if (isUserVote) {
-                Icon(
-                    Icons.Default.Check,
-                    contentDescription = "Tu voto",
-                    tint = Green600
+            if (!isActive || hasVoted) {
+                Text(
+                    text = "${option.votes} votos",
+                    fontSize = 12.sp,
+                    color = Gray500
                 )
             }
         }

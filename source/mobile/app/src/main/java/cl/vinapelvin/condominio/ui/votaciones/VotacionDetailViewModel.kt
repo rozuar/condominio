@@ -2,6 +2,7 @@ package cl.vinapelvin.condominio.ui.votaciones
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cl.vinapelvin.condominio.data.local.TokenManager
 import cl.vinapelvin.condominio.data.model.Votacion
 import cl.vinapelvin.condominio.data.repository.VotacionRepository
 import cl.vinapelvin.condominio.data.repository.Result
@@ -24,11 +25,14 @@ data class VotacionDetailUiState(
 
 @HiltViewModel
 class VotacionDetailViewModel @Inject constructor(
-    private val repository: VotacionRepository
+    private val repository: VotacionRepository,
+    tokenManager: TokenManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(VotacionDetailUiState())
     val uiState: StateFlow<VotacionDetailUiState> = _uiState.asStateFlow()
+
+    val userParcelaId = tokenManager.userParcelaId
 
     fun loadVotacion(id: String) {
         viewModelScope.launch {
@@ -60,14 +64,9 @@ class VotacionDetailViewModel @Inject constructor(
 
             when (val result = repository.votar(votacionId, optionId)) {
                 is Result.Success -> {
-                    _uiState.update {
-                        it.copy(
-                            votacion = result.data,
-                            isVoting = false,
-                            voteSuccess = true,
-                            selectedOptionId = null
-                        )
-                    }
+                    // Backend returns {message}; reload votacion to get updated state.
+                    _uiState.update { it.copy(isVoting = false, voteSuccess = true, selectedOptionId = null) }
+                    loadVotacion(votacionId)
                 }
                 is Result.Error -> {
                     _uiState.update {

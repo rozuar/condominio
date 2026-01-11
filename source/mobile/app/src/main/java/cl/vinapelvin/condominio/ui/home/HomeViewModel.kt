@@ -18,6 +18,8 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     val userName = tokenManager.userName
+    val userRole = tokenManager.userRole
+    val userParcelaId = tokenManager.userParcelaId
 
     private val _notificationCount = MutableStateFlow(0)
     val notificationCount: StateFlow<Int> = _notificationCount.asStateFlow()

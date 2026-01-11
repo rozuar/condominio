@@ -80,11 +80,11 @@ interface ApiService {
     suspend fun votar(
         @Path("id") id: String,
         @Body request: VoteRequest
-    ): Response<Votacion>
+    ): Response<VoteResponse>
 
     // Gastos
     @GET("api/v1/gastos/mi-cuenta")
-    suspend fun getMiEstadoCuenta(): Response<EstadoCuenta>
+    suspend fun getMiEstadoCuenta(): Response<MiEstadoCuenta>
 
     // Tesoreria
     @GET("api/v1/tesoreria/resumen")

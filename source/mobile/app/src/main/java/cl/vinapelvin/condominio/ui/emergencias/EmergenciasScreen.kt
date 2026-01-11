@@ -30,6 +30,7 @@ fun EmergenciasScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        containerColor = Gray50,
         topBar = {
             TopAppBar(
                 title = { Text("Emergencias") },
@@ -39,9 +40,9 @@ fun EmergenciasScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Red600,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
         }
@@ -128,19 +129,19 @@ fun EmergenciaCard(emergencia: Emergencia) {
 
     val statusColor = when (emergencia.status) {
         "active" -> Red600
-        "in_progress" -> Amber500
         "resolved" -> Green600
+        "expired" -> Gray500
         else -> Gray500
     }
 
     val statusLabel = when (emergencia.status) {
         "active" -> "Activa"
-        "in_progress" -> "En progreso"
         "resolved" -> "Resuelta"
+        "expired" -> "Expirada"
         else -> emergencia.status
     }
 
-    val isActive = emergencia.status == "active" || emergencia.status == "in_progress"
+    val isActive = emergencia.status == "active"
 
     Card(
         modifier = Modifier.fillMaxWidth(),

@@ -4,27 +4,38 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GastoComun(
-    val id: String,
-    @SerialName("periodo_id") val periodoId: String,
-    @SerialName("user_id") val userId: String,
-    @SerialName("parcela_id") val parcelaId: Int,
-    @SerialName("monto_base") val montoBase: Double,
-    @SerialName("monto_extra") val montoExtra: Double,
-    @SerialName("monto_total") val montoTotal: Double,
-    val status: String,
-    @SerialName("fecha_vencimiento") val fechaVencimiento: String,
-    @SerialName("fecha_pago") val fechaPago: String? = null,
-    @SerialName("metodo_pago") val metodoPago: String? = null
+data class PeriodoGasto(
+    val year: Int = 0,
+    val month: Int = 0
 )
 
 @Serializable
-data class EstadoCuenta(
-    @SerialName("user_id") val userId: String,
+data class GastoComun(
+    val id: String,
+    @SerialName("periodo_id") val periodoId: String,
     @SerialName("parcela_id") val parcelaId: Int,
-    @SerialName("total_pending") val totalPending: Double,
-    @SerialName("total_overdue") val totalOverdue: Double,
-    @SerialName("gastos_pending") val gastosPending: List<GastoComun>,
-    @SerialName("gastos_overdue") val gastosOverdue: List<GastoComun>,
-    @SerialName("ultimo_pago") val ultimoPago: GastoComun? = null
+    @SerialName("parcela_numero") val parcelaNumero: String? = null,
+    @SerialName("user_id") val userId: String? = null,
+    @SerialName("user_name") val userName: String? = null,
+    val monto: Double = 0.0,
+    @SerialName("monto_pagado") val montoPagado: Double = 0.0,
+    val status: String = "pending",
+    @SerialName("fecha_pago") val fechaPago: String? = null,
+    @SerialName("metodo_pago") val metodoPago: String? = null,
+    @SerialName("referencia_pago") val referenciaPago: String? = null,
+    @SerialName("created_at") val createdAt: String? = null,
+    @SerialName("updated_at") val updatedAt: String? = null,
+    val periodo: PeriodoGasto? = null
+)
+
+@Serializable
+data class MiEstadoCuenta(
+    @SerialName("has_parcela") val hasParcela: Boolean = true,
+    val message: String? = null,
+    @SerialName("parcela_id") val parcelaId: Int,
+    @SerialName("parcela_numero") val parcelaNumero: String,
+    @SerialName("gastos_pendientes") val gastosPendientes: List<GastoComun> = emptyList(),
+    @SerialName("gastos_pagados") val gastosPagados: List<GastoComun> = emptyList(),
+    @SerialName("total_pendiente") val totalPendiente: Double = 0.0,
+    @SerialName("total_pagado") val totalPagado: Double = 0.0
 )

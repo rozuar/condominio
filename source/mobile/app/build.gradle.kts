@@ -105,6 +105,8 @@ dependencies {
     implementation("androidx.compose.material:material:1.5.4")
 
     // Firebase
+    // NOTE: Keep Firebase versions compatible with Kotlin 1.9.x used by this project.
+    // Newer Firebase/Play Services artifacts can require Kotlin 2.x metadata.
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-messaging-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -26,6 +27,7 @@ class TokenManager @Inject constructor(
         private val USER_EMAIL_KEY = stringPreferencesKey("user_email")
         private val USER_NAME_KEY = stringPreferencesKey("user_name")
         private val USER_ROLE_KEY = stringPreferencesKey("user_role")
+        private val USER_PARCELA_ID_KEY = intPreferencesKey("user_parcela_id")
     }
 
     val accessToken: Flow<String?> = context.dataStore.data.map { it[ACCESS_TOKEN_KEY] }
@@ -35,6 +37,7 @@ class TokenManager @Inject constructor(
     val userEmail: Flow<String?> = context.dataStore.data.map { it[USER_EMAIL_KEY] }
     val userName: Flow<String?> = context.dataStore.data.map { it[USER_NAME_KEY] }
     val userRole: Flow<String?> = context.dataStore.data.map { it[USER_ROLE_KEY] }
+    val userParcelaId: Flow<Int?> = context.dataStore.data.map { it[USER_PARCELA_ID_KEY] }
 
     suspend fun getAccessToken(): String? {
         return context.dataStore.data.first()[ACCESS_TOKEN_KEY]
@@ -51,12 +54,17 @@ class TokenManager @Inject constructor(
         }
     }
 
-    suspend fun saveUser(id: String, email: String, name: String, role: String) {
+    suspend fun saveUser(id: String, email: String, name: String, role: String, parcelaId: Int?) {
         context.dataStore.edit { prefs ->
             prefs[USER_ID_KEY] = id
             prefs[USER_EMAIL_KEY] = email
             prefs[USER_NAME_KEY] = name
             prefs[USER_ROLE_KEY] = role
+            if (parcelaId != null) {
+                prefs[USER_PARCELA_ID_KEY] = parcelaId
+            } else {
+                prefs.remove(USER_PARCELA_ID_KEY)
+            }
         }
     }
 

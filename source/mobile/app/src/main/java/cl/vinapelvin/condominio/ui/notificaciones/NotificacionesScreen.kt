@@ -31,6 +31,7 @@ fun NotificacionesScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        containerColor = Gray50,
         topBar = {
             TopAppBar(
                 title = { Text("Notificaciones") },
@@ -45,7 +46,13 @@ fun NotificacionesScreen(
                             Icon(Icons.Default.DoneAll, contentDescription = "Marcar todas como leidas")
                         }
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         }
     ) { paddingValues ->

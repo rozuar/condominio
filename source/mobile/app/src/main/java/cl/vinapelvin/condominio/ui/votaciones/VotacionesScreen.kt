@@ -32,6 +32,7 @@ fun VotacionesScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        containerColor = Gray50,
         topBar = {
             TopAppBar(
                 title = { Text("Votaciones") },
@@ -40,6 +41,12 @@ fun VotacionesScreen(
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
                 }
+                ,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         }
     ) { paddingValues ->
@@ -65,11 +72,19 @@ fun VotacionesScreen(
                     }
                 }
                 uiState.votaciones.isEmpty() -> {
-                    Text(
-                        "No hay votaciones",
+                    Column(
                         modifier = Modifier.align(Alignment.Center),
-                        color = Gray500
-                    )
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "No hay votaciones",
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 18.sp,
+                            color = Gray900
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text("Cuando haya una nueva, aparecerá aquí.", color = Gray500)
+                    }
                 }
                 else -> {
                     LazyColumn(
@@ -171,12 +186,16 @@ fun VotacionCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "${votacion.options.size} opciones",
+                    text = if (votacion.options.isNotEmpty()) {
+                        "${votacion.options.size} opciones"
+                    } else {
+                        "${votacion.totalVotes} votos"
+                    },
                     fontSize = 12.sp,
                     color = Gray500
                 )
                 Text(
-                    text = "Hasta: ${formatDate(votacion.endDate)}",
+                    text = votacion.endDate?.let { "Hasta: ${formatDate(it)}" } ?: "Sin fecha límite",
                     fontSize = 12.sp,
                     color = Gray500
                 )

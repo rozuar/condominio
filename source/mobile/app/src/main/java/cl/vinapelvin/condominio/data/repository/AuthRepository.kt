@@ -35,7 +35,8 @@ class AuthRepository @Inject constructor(
                     authResponse.user.id,
                     authResponse.user.email,
                     authResponse.user.name,
-                    authResponse.user.role
+                    authResponse.user.role,
+                    authResponse.user.parcelaId
                 )
                 Result.Success(authResponse.user)
             } else {
