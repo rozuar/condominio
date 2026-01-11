@@ -3,6 +3,9 @@ package database
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -18,28 +21,91 @@ func New(databaseURL string) (*DB, error) {
 		return nil, fmt.Errorf("failed to parse database URL: %w", err)
 	}
 
+	// Keep startup lightweight for managed DBs (often low connection limits).
 	config.MaxConns = 25
-	config.MinConns = 5
+	config.MinConns = 0
 	config.MaxConnLifetime = time.Hour
 	config.MaxConnIdleTime = 30 * time.Minute
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	// Connection/Ping retries help on cold starts (Railway/GCP/etc).
+	connectTimeout := envDurationSeconds("DB_CONNECT_TIMEOUT_SECONDS", 30)
+	maxWait := envDurationSeconds("DB_CONNECT_MAX_WAIT_SECONDS", 120)
+	deadline := time.Now().Add(maxWait)
 
-	pool, err := pgxpool.NewWithConfig(ctx, config)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create connection pool: %w", err)
+	var lastErr error
+	for attempt := 1; time.Now().Before(deadline); attempt++ {
+		ctx, cancel := context.WithTimeout(context.Background(), connectTimeout)
+
+		pool, err := pgxpool.NewWithConfig(ctx, config)
+		if err != nil {
+			lastErr = err
+			cancel()
+			time.Sleep(backoff(attempt))
+			continue
+		}
+
+		if err := pool.Ping(ctx); err != nil {
+			lastErr = err
+			pool.Close()
+			cancel()
+			time.Sleep(backoff(attempt))
+			continue
+		}
+
+		cancel()
+		return &DB{Pool: pool}, nil
 	}
 
-	if err := pool.Ping(ctx); err != nil {
-		return nil, fmt.Errorf("failed to ping database: %w", err)
-	}
-
-	return &DB{Pool: pool}, nil
+	return nil, fmt.Errorf("failed to ping database after retries (host=%s sslmode=%s): %w",
+		safeHost(databaseURL),
+		safeSSLMode(databaseURL),
+		lastErr,
+	)
 }
 
 func (db *DB) Close() {
 	db.Pool.Close()
+}
+
+func envDurationSeconds(key string, defaultSeconds int) time.Duration {
+	if v := os.Getenv(key); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			return time.Duration(n) * time.Second
+		}
+	}
+	return time.Duration(defaultSeconds) * time.Second
+}
+
+func backoff(attempt int) time.Duration {
+	// 1s, 2s, 4s, 8s, 10s, 10s...
+	d := time.Duration(1<<min(attempt-1, 4)) * time.Second
+	if d > 10*time.Second {
+		return 10 * time.Second
+	}
+	return d
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func safeHost(databaseURL string) string {
+	u, err := url.Parse(databaseURL)
+	if err != nil {
+		return ""
+	}
+	return u.Host
+}
+
+func safeSSLMode(databaseURL string) string {
+	u, err := url.Parse(databaseURL)
+	if err != nil {
+		return ""
+	}
+	return u.Query().Get("sslmode")
 }
 
 func (db *DB) RunMigrations(ctx context.Context) error {
