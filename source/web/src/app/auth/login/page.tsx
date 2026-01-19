@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { getGoogleAuthUrl } from '@/lib/auth'
+import Image from 'next/image'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -63,11 +64,14 @@ export default function LoginPage() {
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Iniciar Sesion</h1>
-          <p className="text-gray-600 mt-2">Accede a tu cuenta de vecino</p>
+          <div className="flex justify-center mb-4">
+            <Image src="/logo.svg" alt="Comunidad Viña Pelvin" width={56} height={56} priority />
+          </div>
+          <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">Iniciar Sesión</h1>
+          <p className="text-gray-600 mt-2">Accede a tu cuenta</p>
         </div>
 
-        <div className="bg-white p-8 rounded-lg shadow border">
+        <div className="card p-8">
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded">
               {error}
@@ -78,7 +82,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 py-2.5 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors mb-6"
+            className="w-full flex items-center justify-center gap-3 btn-secondary mb-6"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -103,8 +107,8 @@ export default function LoginPage() {
 
           {/* Test Credentials - Solo para desarrollo */}
           {showDevProfiles && (
-            <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <p className="text-xs text-amber-700 font-medium mb-2">Perfiles de prueba:</p>
+            <div className="mb-6 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              <p className="text-xs text-gray-700 font-medium mb-2">MVP · Perfiles de prueba:</p>
 
               <div className="grid grid-cols-2 gap-2">
                 {devProfiles.map((p) => (
@@ -113,7 +117,7 @@ export default function LoginPage() {
                     type="button"
                     onClick={() => loginWith(p.email, p.password)}
                     disabled={isLoading}
-                    className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 py-1.5 px-2 rounded transition-colors disabled:opacity-50"
+                    className="text-xs bg-white hover:bg-gray-100 text-gray-800 py-1.5 px-2 rounded border border-gray-200 transition-colors disabled:opacity-50"
                   >
                     {p.label}
                   </button>
@@ -165,7 +169,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-primary text-white py-2.5 px-4 rounded-lg font-medium hover:bg-primary-dark transition-colors disabled:opacity-50"
+              className="w-full btn-primary"
             >
               {isLoading ? 'Ingresando...' : 'Ingresar con Email'}
             </button>

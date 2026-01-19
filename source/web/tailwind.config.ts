@@ -10,24 +10,25 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#00C853',
-          light: '#69F0AE',
-          dark: '#00A844',
+          // Sophisticated brand palette (muted, professional)
+          DEFAULT: '#0F3D2E', // deep forest
+          light: '#145A43',
+          dark: '#0B2A1F',
         },
         tierra: {
-          DEFAULT: '#FF9800',
-          light: '#FFB74D',
-          dark: '#F57C00',
+          DEFAULT: '#B7791F',
+          light: '#D69E2E',
+          dark: '#975A16',
         },
         agua: {
-          DEFAULT: '#00B0FF',
-          light: '#40C4FF',
-          dark: '#0091EA',
+          DEFAULT: '#2563EB',
+          light: '#60A5FA',
+          dark: '#1D4ED8',
         },
-        cielo: '#00E5FF',
-        accent: '#FF4081',
-        success: '#00E676',
-        warning: '#FFEA00',
+        cielo: '#0EA5E9',
+        accent: '#7C3AED',
+        success: '#16A34A',
+        warning: '#CA8A04',
       },
     },
   },

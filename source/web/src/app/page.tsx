@@ -35,7 +35,7 @@ export default async function HomePage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary to-primary-light text-white py-16 md:py-24">
+      <section className="bg-gradient-to-br from-gray-950 via-gray-900 to-primary text-white py-16 md:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
@@ -49,16 +49,16 @@ export default async function HomePage() {
       </section>
 
       {/* Quick Links */}
-      <section className="py-8 bg-gray-50">
+      <section className="py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {quickLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className="flex flex-col items-center p-4 bg-white rounded-lg border hover:shadow-md transition-shadow text-center"
+                className="group flex flex-col items-center p-4 card hover:shadow-md transition-shadow text-center"
               >
-                <link.icon className="w-8 h-8 text-primary mb-2" />
+                <link.icon className="w-8 h-8 text-primary mb-2 group-hover:text-primary-dark transition-colors" />
                 <span className="font-medium text-gray-900">{link.name}</span>
                 <span className="text-xs text-gray-500">{link.description}</span>
               </Link>

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
 import { Menu, X, User, LogOut } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
@@ -28,12 +29,21 @@ export default function Header() {
     : publicNavigation
 
   return (
-    <header className="bg-primary text-white">
+    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-gray-200">
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-2">
-              <span className="text-xl font-bold">Viña Pelvin</span>
+              <Image
+                src="/logo.svg"
+                alt="Comunidad Viña Pelvin"
+                width={28}
+                height={28}
+                priority
+              />
+              <span className="text-base sm:text-lg font-semibold text-gray-900 tracking-tight">
+                Comunidad Viña Pelvin
+              </span>
             </Link>
           </div>
 
@@ -44,7 +54,7 @@ export default function Header() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-white/90 hover:text-white transition-colors"
+                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   {item.name}
                 </Link>
@@ -53,13 +63,13 @@ export default function Header() {
               {!isLoading && (
                 isAuthenticated ? (
                   <div className="flex items-center gap-4">
-                    <span className="text-sm text-white/80 flex items-center gap-1">
+                    <span className="text-sm text-gray-600 flex items-center gap-1">
                       <User size={16} />
                       {user?.name}
                     </span>
                     <button
                       onClick={logout}
-                      className="flex items-center gap-1 text-white/90 hover:text-white"
+                      className="flex items-center gap-1 text-gray-600 hover:text-gray-900"
                     >
                       <LogOut size={16} />
                       Salir
@@ -68,7 +78,7 @@ export default function Header() {
                 ) : (
                   <Link
                     href="/auth/login"
-                    className="bg-white text-primary px-4 py-2 rounded-lg font-medium hover:bg-white/90 transition-colors"
+                    className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors shadow-sm"
                   >
                     Ingresar
                   </Link>
@@ -81,7 +91,7 @@ export default function Header() {
           <div className="md:hidden">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2"
+              className="p-2 text-gray-700"
             >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -96,7 +106,7 @@ export default function Header() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-white/90 hover:text-white py-2"
+                  className="text-gray-700 hover:text-gray-900 py-2"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {item.name}
@@ -106,15 +116,15 @@ export default function Header() {
               {!isLoading && (
                 isAuthenticated ? (
                   <>
-                    <div className="border-t border-white/20 my-2 pt-2">
-                      <span className="text-sm text-white/80">{user?.name}</span>
+                    <div className="border-t border-gray-200 my-2 pt-2">
+                      <span className="text-sm text-gray-600">{user?.name}</span>
                     </div>
                     <button
                       onClick={() => {
                         logout()
                         setMobileMenuOpen(false)
                       }}
-                      className="text-white/90 hover:text-white py-2 text-left"
+                      className="text-gray-700 hover:text-gray-900 py-2 text-left"
                     >
                       Cerrar sesión
                     </button>
@@ -122,7 +132,7 @@ export default function Header() {
                 ) : (
                   <Link
                     href="/auth/login"
-                    className="bg-white text-primary px-4 py-2 rounded-lg font-medium text-center mt-2"
+                    className="bg-primary text-white px-4 py-2 rounded-lg font-medium text-center mt-2 shadow-sm"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Ingresar
