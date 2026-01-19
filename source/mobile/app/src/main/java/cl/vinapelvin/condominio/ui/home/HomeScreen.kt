@@ -50,6 +50,8 @@ fun HomeScreen(
         MenuItem("Comunicados", Icons.Default.Campaign, NavRoutes.Comunicados.route, Blue600),
         MenuItem("Eventos", Icons.Default.Event, NavRoutes.Eventos.route, Green600),
         MenuItem("Emergencias", Icons.Default.Warning, NavRoutes.Emergencias.route, Red600),
+        MenuItem("Galerías", Icons.Default.PhotoLibrary, NavRoutes.Galerias.route, Amber500),
+        MenuItem("Mapa", Icons.Default.Map, NavRoutes.Mapa.route, Green500),
     )
 
     val protectedItems = listOf(

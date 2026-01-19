@@ -13,10 +13,14 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 // Muted accent palette (avoid overly saturated "kids app" look)
+val Blue400 = Color(0xFF3B82F6)
+val Blue500 = Color(0xFF2563EB)
 val Blue600 = Color(0xFF1F4B99)
 val Blue700 = Color(0xFF1B3F80)
 val Blue800 = Color(0xFF163462)
+val Green500 = Color(0xFF22C55E)
 val Green600 = Color(0xFF1E6B3A)
+val Red500 = Color(0xFFEF4444)
 val Red600 = Color(0xFFB3261E)
 val Amber500 = Color(0xFFC58F00)
 // Brand palette (docs)
@@ -26,7 +30,11 @@ val Tierra = Color(0xFF8B7355)
 val Agua = Color(0xFF3B82A0)
 val Gray50 = Color(0xFFF9FAFB)
 val Gray100 = Color(0xFFF3F4F6)
+val Gray200 = Color(0xFFE5E7EB)
+val Gray400 = Color(0xFF9CA3AF)
 val Gray500 = Color(0xFF6B7280)
+val Gray600 = Color(0xFF4B5563)
+val Gray700 = Color(0xFF374151)
 val Gray900 = Color(0xFF111827)
 
 private val LightColorScheme = lightColorScheme(

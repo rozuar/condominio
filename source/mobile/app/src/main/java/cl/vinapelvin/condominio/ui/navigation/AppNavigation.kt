@@ -26,6 +26,9 @@ import cl.vinapelvin.condominio.ui.tesoreria.TesoreriaScreen
 import cl.vinapelvin.condominio.ui.actas.ActasScreen
 import cl.vinapelvin.condominio.ui.actas.ActaDetailScreen
 import cl.vinapelvin.condominio.ui.documentos.DocumentosScreen
+import cl.vinapelvin.condominio.ui.galerias.GaleriasScreen
+import cl.vinapelvin.condominio.ui.galerias.GaleriaDetailScreen
+import cl.vinapelvin.condominio.ui.mapa.MapaScreen
 
 @Composable
 fun AppNavigation() {
@@ -164,6 +167,30 @@ fun AppNavigation() {
 
         composable(NavRoutes.Contacto.route) {
             ContactoScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(NavRoutes.Galerias.route) {
+            GaleriasScreen(
+                onBack = { navController.popBackStack() },
+                onGaleriaClick = { id ->
+                    navController.navigate(NavRoutes.GaleriaDetail.createRoute(id))
+                }
+            )
+        }
+
+        composable(
+            route = NavRoutes.GaleriaDetail.route,
+            arguments = listOf(navArgument("id") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id") ?: return@composable
+            GaleriaDetailScreen(
+                galeriaId = id,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(NavRoutes.Mapa.route) {
+            MapaScreen(onBack = { navController.popBackStack() })
         }
     }
 }

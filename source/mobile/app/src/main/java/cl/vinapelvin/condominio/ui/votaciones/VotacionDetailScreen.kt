@@ -1,6 +1,8 @@
 package cl.vinapelvin.condominio.ui.votaciones
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,15 +10,19 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.HowToVote
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import cl.vinapelvin.condominio.data.model.Votacion
 import cl.vinapelvin.condominio.data.model.VotacionOpcion
 import cl.vinapelvin.condominio.ui.theme.*
 
@@ -119,8 +125,16 @@ fun VotacionDetailScreen(
 
                         Spacer(modifier = Modifier.height(24.dp))
 
+                        val showResults = votacion.userVoted || votacion.status == "closed"
+
+                        // Results summary when showing results
+                        if (showResults && votacion.totalVotes > 0) {
+                            ResultsSummaryCard(votacion = votacion)
+                            Spacer(modifier = Modifier.height(24.dp))
+                        }
+
                         Text(
-                            text = "Opciones",
+                            text = if (showResults) "Resultados" else "Opciones",
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 18.sp,
                             color = Gray900
@@ -129,18 +143,25 @@ fun VotacionDetailScreen(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         votacion.options.forEach { option ->
-                            OptionCard(
-                                option = option,
-                                isSelected = uiState.selectedOptionId == option.id,
-                                hasVoted = votacion.userVoted,
-                                isActive = votacion.status == "active",
-                                canVote = canVote,
-                                onClick = {
-                                    if (canVote && !votacion.userVoted && votacion.status == "active") {
-                                        viewModel.selectOption(option.id)
+                            if (showResults) {
+                                ResultOptionCard(
+                                    option = option,
+                                    totalVotes = votacion.totalVotes
+                                )
+                            } else {
+                                OptionCard(
+                                    option = option,
+                                    isSelected = uiState.selectedOptionId == option.id,
+                                    hasVoted = votacion.userVoted,
+                                    isActive = votacion.status == "active",
+                                    canVote = canVote,
+                                    onClick = {
+                                        if (canVote && !votacion.userVoted && votacion.status == "active") {
+                                            viewModel.selectOption(option.id)
+                                        }
                                     }
-                                }
-                            )
+                                )
+                            }
                             Spacer(modifier = Modifier.height(8.dp))
                         }
 
@@ -257,6 +278,152 @@ fun OptionCard(
                     color = Gray500
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun ResultsSummaryCard(votacion: Votacion) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = Blue600.copy(alpha = 0.05f)
+        ),
+        border = BorderStroke(1.dp, Blue600.copy(alpha = 0.2f))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.HowToVote,
+                        contentDescription = null,
+                        tint = Blue600,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Total de votos",
+                        fontSize = 14.sp,
+                        color = Gray700
+                    )
+                }
+                Text(
+                    text = "${votacion.totalVotes}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = Blue600
+                )
+            }
+
+            if (votacion.requiresQuorum) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Divider(color = Gray200)
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Groups,
+                            contentDescription = null,
+                            tint = Gray600,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Quórum requerido",
+                            fontSize = 14.sp,
+                            color = Gray700
+                        )
+                    }
+                    Text(
+                        text = "${votacion.quorumPercentage}%",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp,
+                        color = Gray700
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ResultOptionCard(
+    option: VotacionOpcion,
+    totalVotes: Int
+) {
+    val percentage = if (totalVotes > 0) {
+        (option.votes.toFloat() / totalVotes.toFloat()) * 100
+    } else {
+        0f
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, Gray100)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .animateContentSize()
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = option.text,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Gray900,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = "${option.votes} votos",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Blue600
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Progress bar
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(Gray100)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(fraction = (percentage / 100f).coerceIn(0f, 1f))
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(
+                            if (percentage >= 50) Green600 else Blue600
+                        )
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = String.format("%.1f%%", percentage),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+                color = if (percentage >= 50) Green600 else Gray600
+            )
         }
     }
 }

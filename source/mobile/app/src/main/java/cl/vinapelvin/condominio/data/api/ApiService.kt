@@ -3,6 +3,9 @@ package cl.vinapelvin.condominio.data.api
 import cl.vinapelvin.condominio.data.model.*
 import retrofit2.Response
 import retrofit2.http.*
+import retrofit2.http.GET
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
 
@@ -146,4 +149,19 @@ interface ApiService {
 
     @GET("api/v1/contacto/mis-mensajes")
     suspend fun getMisMensajes(): Response<MisMensajesResponse>
+
+    // Galerias
+    @GET("api/v1/galerias")
+    suspend fun getGalerias(
+        @Query("page") page: Int = 1,
+        @Query("per_page") perPage: Int = 20,
+        @Query("is_public") isPublic: Boolean? = null
+    ): Response<GaleriaListResponse>
+
+    @GET("api/v1/galerias/{id}")
+    suspend fun getGaleria(@Path("id") id: String): Response<GaleriaWithItems>
+
+    // Mapa
+    @GET("api/v1/mapa")
+    suspend fun getMapaData(): Response<MapaData>
 }

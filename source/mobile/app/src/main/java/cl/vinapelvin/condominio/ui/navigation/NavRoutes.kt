@@ -25,4 +25,9 @@ sealed class NavRoutes(val route: String) {
     object Documentos : NavRoutes("documentos")
     object Notificaciones : NavRoutes("notificaciones")
     object Contacto : NavRoutes("contacto")
+    object Galerias : NavRoutes("galerias")
+    object GaleriaDetail : NavRoutes("galeria/{id}") {
+        fun createRoute(id: String) = "galeria/$id"
+    }
+    object Mapa : NavRoutes("mapa")
 }
